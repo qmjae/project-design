@@ -1,5 +1,4 @@
-# project-design
-Sol
+#Sol Application
 
 This is an application for our design project called "Design of Defective Module Detection for Solar  Panel Thermography Analysis System using Deep Learning". 
 
