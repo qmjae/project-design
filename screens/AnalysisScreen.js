@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -16,6 +16,7 @@ export default function AnalysisScreen({ navigation }) {
     if (!result.canceled) {
       const newFiles = result.assets.map(asset => ({
         uri: asset.uri,
+        imageUri: asset.uri,
         name: asset.uri.split('/').pop(),
         size: '999 KB', // You would calculate actual size
         status: 'Upload Failed' // Default status, you can modify based on upload result
@@ -27,6 +28,18 @@ export default function AnalysisScreen({ navigation }) {
   const removeFile = (index) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
+  };
+
+  const handleResults = () => {
+    if (uploadedFiles.length === 0) {
+      Alert.alert(
+        "No Images",
+        "No uploaded image! Please upload an image!",
+        [{ text: "OK" }]
+      );
+    } else {
+      navigation.navigate('Results', { files: uploadedFiles });
+    }
   };
 
   return (
@@ -80,8 +93,11 @@ export default function AnalysisScreen({ navigation }) {
 
       {/* Results Button */}
       <TouchableOpacity 
-        style={styles.resultsButton}
-        onPress={() => {/* Handle results */}}
+        style={[
+          styles.resultsButton,
+          uploadedFiles.length === 0 && styles.resultsButtonDisabled
+        ]}
+        onPress={handleResults}
       >
         <Text style={styles.resultsButtonText}>Results</Text>
       </TouchableOpacity>
@@ -210,5 +226,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  resultsButtonDisabled: {
+    backgroundColor: '#D3D3D3',
   },
 }); 
