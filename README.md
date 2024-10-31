@@ -9,7 +9,10 @@ The general objective of the project is to design a defective module detection f
 Specifically, it aims to:
 1. Design a system prototype that detects module defects from captured thermal images namely partial shading effect, dust deposit, short-circuited PV module, and bypass diode failure.
 2. Develop a mobile application that:
+
    2.1 Alerts users about detected defects and their priority levels.
+   
    2.2 Displays detailed information about the detected defects such as stress factors, power loss, category, classes of abnormalities and description.
+   
    2.3 Recommends corrective actions based on defect history.
-3. Test and evaluate the accuracy of the prototype.
+4. Test and evaluate the accuracy of the prototype.
