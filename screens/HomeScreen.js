@@ -3,9 +3,9 @@ import { StyleSheet, View, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
-import Header from '../components/Header';
-import WelcomeSection from '../components/WelcomeSection';
-import ActionButtons from '../components/ActionButtons';
+import Header from '../components/home/Header';
+import WelcomeSection from '../components/home/WelcomeSection';
+import ActionButtons from '../components/home/ActionButtons';
 
 export default function HomeScreen({ navigation }) {
   return (
@@ -24,12 +24,12 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    paddingVertical: 25,
+    flex: 1, // Ensures the SafeAreaView fills the entire screen
+    backgroundColor: '#fff', // Sets the background color to white
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Adjusts for Android status bar height
+    paddingVertical: 25, // Adds vertical padding for content spacing
   },
   container: {
-    flex: 1,
+    flex: 1, // Fills the available space in the safe area
   },
-}); 
+});
