@@ -8,10 +8,10 @@ export const HeaderAnalysis = ({ onBack }) => (
     <View style={styles.header}>
       <TouchableOpacity 
         onPress={onBack}
-      style={styles.backButton}
-    >
+        style={styles.backButton}
+      >
       <Ionicons name="arrow-back" size={40} color="black" />
-    </TouchableOpacity>
+      </TouchableOpacity>
     <View style={styles.headerTitleContainer}>
       <Text style={styles.headerTitle}>Analysis</Text>
     </View>
