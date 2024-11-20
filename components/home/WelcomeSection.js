@@ -1,11 +1,16 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { useGlobalContext } from '../../context/GlobalProvider';
 
 export default function WelcomeSection() {
+  const { user } = useGlobalContext();
+
   return (
     <View style={styles.welcomeSection}>
       <Text style={styles.welcomeText}>Welcome,</Text>
-      <Text style={[styles.welcomeText, styles.highlightText]}>User</Text>
+      <Text style={[styles.welcomeText, styles.highlightText]}>
+        {user ? user.username : 'User'}
+      </Text>
     </View>
   );
 }

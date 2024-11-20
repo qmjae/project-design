@@ -1,18 +1,20 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Header() {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.header}>
-      <TouchableOpacity style={styles.menuButton}>
-        <Text style={styles.menuIcon}>☰</Text>
-      </TouchableOpacity>
       <View style={styles.logoContainer}>
-        <Image 
-          source={require('../../assets/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+          <Image 
+            source={require('../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -25,13 +27,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 2,
     height: 56,
-  },
-  menuButton: {
-    padding: 8,
-  },
-  menuIcon: {
-    fontSize: 24,
-    color: '#333',
   },
   logoContainer: {
     position: 'absolute',
