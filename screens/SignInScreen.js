@@ -30,6 +30,7 @@ const SignInScreen = ({ navigation }) => {
       navigation.navigate('Home');
     } catch (error) {
       console.log(error);
+      Alert.alert('That username and password was incorrect. ', 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

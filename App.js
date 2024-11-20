@@ -12,6 +12,7 @@ import GlobalProvider from './context/GlobalProvider';
 const Stack = createStackNavigator();
 
 export default function App() {
+
   return (
       <GlobalProvider>
       <NavigationContainer>

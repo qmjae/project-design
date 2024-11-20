@@ -1,22 +1,28 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 const LoadingScreen = () => {
   const navigation = useNavigation();
+  const { loading, isLogged } = useGlobalContext();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.replace('SignIn');
-    }, 2000);
+    if (!loading && isLogged) {
+      navigation.navigate('Home');
+    } else {
+      const timer = setTimeout(() => {
+        navigation.replace('SignIn');
+      }, 2000);
 
-    return () => clearTimeout(timer);
-  }, [navigation]);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, isLogged, navigation]);
 
   return (
     <View style={styles.container}>
       <Image 
-        source={require('../assets/logo-name.png')} // Update the path to your logo
+        source={require('../assets/logo-name.png')}
         style={styles.logo}
       />
     </View>
@@ -28,16 +34,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff', // Change to your preferred background color
+    backgroundColor: '#fff',
   },
   logo: {
-    width: 150, // Adjust the width as needed
-    height: 200, // Adjust the height as needed
+    width: 150,
+    height: 200,
     marginBottom: 20,
-  },
-  appName: {
-    fontSize: 24, // Adjust the font size as needed
-    fontWeight: 'bold',
   },
 });
 
