@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
+import { uploadFilesToAppwrite } from '../lib/appwrite';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -29,10 +30,10 @@ export default function AnalysisScreen({ navigation }) {
       const newFiles = result.assets
         .slice(0, remainingSlots)
         .map(asset => ({
-          uri: asset.uri,
           imageUri: asset.uri,
           name: asset.uri.split('/').pop(),
-          size: '999 KB',
+          type: asset.mimeType,
+          size: asset.fileSize,
         }));
       setUploadedFiles([...uploadedFiles, ...newFiles]);
     }
@@ -43,7 +44,7 @@ export default function AnalysisScreen({ navigation }) {
     setUploadedFiles(newFiles);
   };
 
-  const handleResults = () => {
+  const handleResults = async () => {
     if (uploadedFiles.length === 0) {
       Alert.alert(
         "No Images",
@@ -51,7 +52,13 @@ export default function AnalysisScreen({ navigation }) {
         [{ text: "OK" }]
       );
     } else {
-      navigation.navigate('Results', { files: uploadedFiles });
+      try {
+        const uploadedFilesData = await uploadFilesToAppwrite(uploadedFiles);
+        console.log('Analysis Screen Uploaded Files Data:', uploadedFilesData);
+        navigation.navigate('Results', { files: uploadedFiles });
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      }
     }
   };
 
