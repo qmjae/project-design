@@ -16,3 +16,6 @@ Specifically, it aims to:
    
    2.3 Recommends corrective actions based on defect history.
 4. Test and evaluate the accuracy of the prototype.
+
+
+This application is built using FastAPI and Ultralytics YOLOv8. Using Appwrite as the backend service and React Native for the mobile application.
