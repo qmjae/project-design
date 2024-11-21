@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useGlobalContext } from '../context/GlobalProvider';
+import { useGlobalContext } from '../../backend/context/GlobalProvider';
 
 const LoadingScreen = () => {
   const navigation = useNavigation();
@@ -22,7 +22,7 @@ const LoadingScreen = () => {
   return (
     <View style={styles.container}>
       <Image 
-        source={require('../assets/logo-name.png')}
+        source={require('../../assets/logo-name.png')}
         style={styles.logo}
       />
     </View>

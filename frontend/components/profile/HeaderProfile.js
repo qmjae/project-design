@@ -2,8 +2,8 @@ import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { signOut } from '../../lib/appwrite';
-import { useGlobalContext } from '../../context/GlobalProvider';
+import { signOut } from '../../../backend/lib/appwrite';
+import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { useNavigation } from '@react-navigation/native';
 
 export const HeaderProfile = ({ onBack }) => {

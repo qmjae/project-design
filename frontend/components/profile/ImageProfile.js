@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useGlobalContext } from '../../context/GlobalProvider';
-import { uploadImage, updateUserProfilePicture } from '../../lib/appwrite';
+import { useGlobalContext } from '../../../backend/context/GlobalProvider';
+import { uploadImage, updateUserProfilePicture } from '../../../backend/lib/appwrite';
 
 const ImageProfile = () => {
   const { user, setUser } = useGlobalContext();

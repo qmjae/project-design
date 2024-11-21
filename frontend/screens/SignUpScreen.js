@@ -3,8 +3,8 @@ import { Alert, View, Text, ScrollView, Dimensions, StyleSheet, Image } from "re
 import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "../components/auth/FormField";
 import CustomButton from "../components/auth/CustomButton";
-import { createUser } from '../lib/appwrite';
-import { useGlobalContext } from "../context/GlobalProvider";
+import { createUser } from '../../backend/lib/appwrite';
+import { useGlobalContext } from "../../backend/context/GlobalProvider";
 
 const SignUpScreen = ({ navigation }) => {
   const { setUser, setIsLogged } = useGlobalContext();
@@ -45,7 +45,7 @@ const SignUpScreen = ({ navigation }) => {
         <View style={styles.innerContainer}>
         <View style={styles.logoContainer}>
             <Image
-              source={require("../assets/logo.png")}
+              source={require("../../assets/logo.png")}
               resizeMode="contain"
               style={styles.logo}
             />
