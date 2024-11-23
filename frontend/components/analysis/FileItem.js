@@ -1,9 +1,20 @@
 import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, { 
+  FadeOut,
+  FadeIn,
+  LinearTransition,
+  SlideOutRight
+} from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export const FileItem = memo(({ file, onRemove }) => (
-  <View style={styles.fileItem}>
+  <Animated.View 
+    entering={FadeIn}
+    exiting={SlideOutRight.duration(200)}
+    layout={LinearTransition.springify()}
+    style={styles.fileItem}
+  >
     <View style={styles.fileInfo}>
       <Ionicons name="image-outline" size={35} color="#FFD700" />
       <View style={styles.fileDetails}>
@@ -12,9 +23,9 @@ export const FileItem = memo(({ file, onRemove }) => (
       </View>
     </View>
     <TouchableOpacity onPress={onRemove}>
-      <Ionicons name="trash-outline" size={24} color="red" />
+        <Ionicons name="trash-outline" size={24} color="red" />
     </TouchableOpacity>
-  </View>
+  </Animated.View>
 ));
 
 const styles = StyleSheet.create({

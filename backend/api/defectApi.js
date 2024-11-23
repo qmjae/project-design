@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:8000/';  // Replace with your computer's IP
+const API_URL = 'http://192.168.1.9:8000';  // Replace with your computer's IP
 
 export const defectApi = {
   async detectDefects(imageUri) {

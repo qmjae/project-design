@@ -1,17 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Animated, { 
+  useSharedValue,
+  useAnimatedStyle, 
+  withSequence,
+  withTiming,
+  withRepeat
+} from 'react-native-reanimated';
 
-export const ImportSection = ({ onPress }) => (
-  <TouchableOpacity 
-    style={styles.importSection}
-    onPress={onPress}
-  >
-    <Ionicons name="cloud-upload-outline" size={50} color="#FFD700" />
-    <Text style={styles.importText}>Import your image</Text>
-    <Text style={styles.clickText}>Click to upload</Text>
-  </TouchableOpacity>
-);
+export const ImportSection = ({ onPress }) => {
+  const translateY = useSharedValue(0);
+
+  useEffect(() => {
+    translateY.value = withRepeat(
+      withSequence(
+        withTiming(-8, { duration: 1000 }),
+        withTiming(0, { duration: 1000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }]
+  }));
+
+  return (
+    <TouchableOpacity onPress={onPress}>
+      <Animated.View style={[styles.importSection, animatedStyle]}>
+        <Ionicons name="cloud-upload-outline" size={50} color="#FFD700" />
+        <Text style={styles.importText}>Import your image</Text>
+        <Text style={styles.clickText}>Click to upload</Text>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   importSection: {
