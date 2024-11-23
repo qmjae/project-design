@@ -85,13 +85,3 @@ DEFECT_CLASSES = {
 def get_defect_info(class_name):
     """Get detailed information about a specific defect class"""
     return DEFECT_CLASSES.get(class_name.lower())
-
-def get_recommendations(class_name):
-    """Get recommendations for a specific defect class"""
-    defect = DEFECT_CLASSES.get(class_name.lower())
-    return defect.recommendations if defect else []
-
-def get_priority_level(class_name):
-    """Get priority level for a specific defect class"""
-    defect = DEFECT_CLASSES.get(class_name.lower())
-    return defect.priorityLevel if defect else "Unknown"

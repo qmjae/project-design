@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
 
 const API_URL = 'http://192.168.1.56:8000';
 
@@ -21,7 +20,6 @@ export const defectApi = {
         },
       });
 
-      console.log('API Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error detecting defects:', error.response || error);

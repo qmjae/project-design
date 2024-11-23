@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { View, ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { ThermalImage } from './ThermalImage';
+import { BoundedImage } from './BoundedImage';
 import { ModuleInfo } from './ModuleInfo';
 import { DetailRow } from './DetailRow';
 import { Section } from './Section';
@@ -14,11 +14,11 @@ export const ResultCard = memo(({ item, width }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <ThermalImage 
+        <BoundedImage 
           imageUri={item.imageUri} 
-          detections={item.detections} 
+          detections={item.detections}
         />
-        
+          
         <View style={styles.contentContainer}>
           <ModuleInfo defectName={detection?.class || 'No defect detected'} />
 
@@ -75,12 +75,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     height: "98%",
+    width: '100%',
   },
   contentContainer: {
     flexGrow: 1,
   },
   scrollContent: {
     paddingBottom: 30,
+    width: '100%',
   },
   detailsContainer: {
     flex: 1,

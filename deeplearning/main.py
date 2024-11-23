@@ -6,9 +6,8 @@ from PIL import Image
 import logging
 import io
 import time
-from defect_classes import get_defect_info, get_recommendations, get_priority_level
-import cv2
-import base64
+from defect_classes import get_defect_info
+
 
 # Configure logging
 logging.basicConfig(
