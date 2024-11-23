@@ -63,7 +63,7 @@ export const BoundedImage = ({ imageUri, detections }) => {
                   x={x1}
                   y={y1 - 5}
                   fill={color}
-                  fontSize="12"
+                  fontSize="15"
                   fontWeight="bold"
                 >
                   {label}

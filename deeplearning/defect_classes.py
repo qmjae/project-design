@@ -54,12 +54,7 @@ DEFECT_CLASSES = {
         CoA="Circuit Failure",
         description="Electrical malfunction where current follows an unintended path, potentially causing severe damage and safety hazards.",
         recommendations=[
-            "Immediate system shutdown",
-            "Professional inspection required",
-            "Replace affected components",
-            "Check wiring and connections",
-            "Install surge protection devices",
-            "Update maintenance protocol"
+            "Immediate system shutdown"
         ]
     ),
     

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SafeAreaView, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
-import { defectApi } from '../../backend/api/defectApi';
+
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);

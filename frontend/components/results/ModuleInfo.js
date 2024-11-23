@@ -13,7 +13,6 @@ export const ModuleInfo = ({ defectName }) => (
 const styles = StyleSheet.create({
   moduleInfo: {
     marginTop: 15,
-    marginBottom: 10,
   },
   moduleTitle: {
     fontSize: 20,
@@ -21,8 +20,7 @@ const styles = StyleSheet.create({
     color: '#222',
   },
   moduleSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
-    marginTop: 2,
   },
 }); 
