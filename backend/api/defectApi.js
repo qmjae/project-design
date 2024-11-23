@@ -1,10 +1,13 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
-const API_URL = 'http://192.168.1.9:8000';  // Replace with your computer's IP
+const API_URL = 'http://192.168.1.56:8000';
 
 export const defectApi = {
   async detectDefects(imageUri) {
     try {
+      console.log('Making API request to:', `${API_URL}/detect/`);
+      
       const formData = new FormData();
       formData.append('file', {
         uri: imageUri,
@@ -18,9 +21,30 @@ export const defectApi = {
         },
       });
 
+      console.log('API Response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error detecting defects:', error);
+      console.error('Error detecting defects:', error.response || error);
+      throw error;
+    }
+  },
+
+  async detectMultipleDefects(files) {
+    try {
+      console.log('Processing multiple files for detection...');
+      const results = await Promise.all(
+        files.map(async (file) => {
+          const result = await this.detectDefects(file.imageUri);
+          return {
+            ...file,
+            detections: result.detections
+          };
+        })
+      );
+      console.log('Multiple detection results:', results);
+      return results;
+    } catch (error) {
+      console.error('Error detecting multiple defects:', error);
       throw error;
     }
   }

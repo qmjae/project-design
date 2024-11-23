@@ -7,8 +7,10 @@ import { PaginationDots } from '../components/results/PaginationDots';
 const { width } = Dimensions.get('window');
 
 export default function ResultsScreen({ navigation, route }) {
-  const { files } = route.params;
+  const { analysisResults } = route.params;
   const [activeIndex, setActiveIndex] = useState(0);
+
+  console.log('Results Screen - Analysis Results:', analysisResults);
 
   const handleScroll = useCallback((event) => {
     const offset = event.nativeEvent.contentOffset.x;
@@ -31,7 +33,7 @@ export default function ResultsScreen({ navigation, route }) {
       <HeaderResults onBack={() => navigation.goBack()} />
 
       <FlatList
-        data={files}
+        data={analysisResults}
         renderItem={renderItem}
         horizontal
         pagingEnabled
@@ -47,7 +49,7 @@ export default function ResultsScreen({ navigation, route }) {
         windowSize={3}
       />
 
-      <PaginationDots totalDots={files.length} activeIndex={activeIndex} />
+      <PaginationDots totalDots={analysisResults.length} activeIndex={activeIndex} />
     </SafeAreaView>
   );
 }

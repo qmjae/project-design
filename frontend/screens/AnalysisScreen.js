@@ -6,9 +6,11 @@ import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
+import { defectApi } from '../../backend/api/defectApi';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const pickImage = async () => {
     if (uploadedFiles.length >= 5) {
@@ -51,14 +53,66 @@ export default function AnalysisScreen({ navigation }) {
         "No uploaded image! Please upload an image!",
         [{ text: "OK" }]
       );
-    } else {
-      try {
-        const uploadedFilesData = await uploadFilesToAppwrite(uploadedFiles);
-        console.log('Analysis Screen Uploaded Files Data:', uploadedFilesData);
-        navigation.navigate('Results', { files: uploadedFiles });
-      } catch (error) {
-        Alert.alert('Error', error.message);
-      }
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      // First, upload files to Appwrite
+      const uploadedFilesData = await uploadFilesToAppwrite(uploadedFiles);
+      console.log('Analysis Screen Uploaded Files Data:', uploadedFilesData);
+
+      // Then process each file for defect detection
+      const analysisResults = await Promise.all(
+        uploadedFiles.map(async (file, index) => {
+          const formData = new FormData();
+          formData.append('file', {
+            uri: file.imageUri,
+            type: file.type || 'image/jpeg',
+            name: file.name
+          });
+
+          const response = await fetch('http://192.168.1.56:8000/detect/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Analysis failed for ${file.name}`);
+          }
+
+          const result = await response.json();
+          
+          // Combine Appwrite data with detection results
+          return {
+            ...uploadedFilesData[index], // Appwrite file data
+            fileName: file.name,
+            imageUri: file.imageUri,
+            detections: result.detections,
+            uploadId: uploadedFilesData[index].$id // Appwrite file ID
+          };
+        })
+      );
+
+      console.log('Final analysis results:', analysisResults);
+
+      navigation.navigate('Results', { 
+        files: uploadedFiles,
+        analysisResults: analysisResults 
+      });
+
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to process images. Please try again.'
+      );
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -73,11 +127,14 @@ export default function AnalysisScreen({ navigation }) {
         <TouchableOpacity 
           style={[
             styles.resultsButton,
-            uploadedFiles.length === 0 && styles.resultsButtonDisabled
+            (uploadedFiles.length === 0 || isAnalyzing) && styles.resultsButtonDisabled
           ]}
           onPress={handleResults}
+          disabled={uploadedFiles.length === 0 || isAnalyzing}
         >
-          <Text style={styles.resultsButtonText}>Results</Text>
+          <Text style={styles.resultsButtonText}>
+            {isAnalyzing ? 'Analyzing...' : 'Results'}
+          </Text>
         </TouchableOpacity>
       </SafeAreaView>
   );

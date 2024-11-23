@@ -5,48 +5,62 @@ import { ModuleInfo } from './ModuleInfo';
 import { DetailRow } from './DetailRow';
 import { Section } from './Section';
 
-export const ResultCard = memo(({ item, width }) => (
-  <View style={[styles.resultCard, { width }]}>
-    <ScrollView 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <ThermalImage imageUri={item.imageUri} />
-      
-      <View style={styles.contentContainer}>
-        <ModuleInfo />
+export const ResultCard = memo(({ item, width }) => {
+  const detection = item.detections && item.detections[0];
+  
+  return (
+    <View style={[styles.resultCard, { width }]}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <ThermalImage 
+          imageUri={item.imageUri} 
+          detections={item.detections} 
+        />
+        
+        <View style={styles.contentContainer}>
+          <ModuleInfo defectName={detection?.class || 'No defect detected'} />
 
-        <View style={styles.detailsContainer}>
-          <DetailRow label="Stress factors" value="Lorem Ipsum" />
-          <DetailRow label="Priority Level" value="Lorem Ipsum" />
-          <DetailRow label="Power Loss" value="Lorem Ipsum" />
-          <DetailRow label="Category" value="Lorem Ipsum" />
-          <DetailRow label="CoA" value="Lorem Ipsum" />
+          <View style={styles.detailsContainer}>
+            <DetailRow 
+              label="Stress factors" 
+              value={detection?.stressFactors?.join(', ') || 'N/A'} 
+            />
+            <DetailRow 
+              label="Priority Level" 
+              value={detection?.priority || 'N/A'} 
+            />
+            <DetailRow 
+              label="Power Loss" 
+              value={detection?.powerLoss || 'N/A'} 
+            />
+            <DetailRow 
+              label="Category" 
+              value={detection?.category || 'N/A'} 
+            />
 
-          <Section 
-            title="Description"
-            content="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-          />
+            <Section 
+              title="Description"
+              content={detection?.description || 'No description available'}
+            />
 
-          <Section 
-            title="Recommendation"
-            content="
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            "
-          />
+            <Section 
+              title="Recommendation"
+              content={detection?.recommendations?.join('\n') || 'No recommendations available'}
+            />
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
 
-    <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.resolvedButton}>
-        <Text style={styles.resolvedButtonText}>Resolve</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.resolvedButton}>
+          <Text style={styles.resolvedButtonText}>Resolve</Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
-));
+  );
+});
 
 const styles = StyleSheet.create({
   resultCard: {

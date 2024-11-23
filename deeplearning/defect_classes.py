@@ -11,7 +11,7 @@ class DefectInfo:
 
 # Define all defect classes
 DEFECT_CLASSES = {
-    "partial_shading": DefectInfo(
+    "partial-shading": DefectInfo(
         className="Partial Shading",
         stressFactors=["Environmental", "External Objects"],
         priorityLevel="Medium",
@@ -28,7 +28,7 @@ DEFECT_CLASSES = {
         ]
     ),
     
-    "dust_deposit": DefectInfo(
+    "dust-deposit": DefectInfo(
         className="Dust Deposit",
         stressFactors=["Environmental", "Maintenance"],
         priorityLevel="Low",
@@ -45,7 +45,7 @@ DEFECT_CLASSES = {
         ]
     ),
     
-    "short_circuit": DefectInfo(
+    "short-circuit": DefectInfo(
         className="Short Circuit",
         stressFactors=["Electrical", "Manufacturing"],
         priorityLevel="High",
@@ -63,7 +63,7 @@ DEFECT_CLASSES = {
         ]
     ),
     
-    "bypass_diode_failure": DefectInfo(
+    "bypass-diode_failure": DefectInfo(
         className="Bypass Diode Failure",
         stressFactors=["Electrical", "Temperature"],
         priorityLevel="High",
