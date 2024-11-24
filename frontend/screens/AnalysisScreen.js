@@ -5,7 +5,7 @@ import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
-
+import BackgroundWrapper from '../components/common/BackgroundWrapper';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -116,6 +116,7 @@ export default function AnalysisScreen({ navigation }) {
   };
 
   return (
+    <BackgroundWrapper>
       <SafeAreaView style={styles.container}>
         <HeaderAnalysis onBack={() => navigation.goBack()} />
         <ImportSection onPress={pickImage} />
@@ -136,18 +137,19 @@ export default function AnalysisScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     padding: 20,
   },
   resultsButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#FFD700',
+    backgroundColor: '#76c0df',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

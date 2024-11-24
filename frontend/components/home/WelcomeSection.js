@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#757575',
+    color: 'black',
     lineHeight: 52,
   },
   highlightText: {

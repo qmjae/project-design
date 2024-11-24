@@ -11,9 +11,8 @@ export default function ActionButtons({ navigation }) {
       >
         <View style={styles.actionContent}>
           <Ionicons 
-            name="add-circle-outline" 
+            name="add-circle" 
             size={24} 
-            color="#FFD700" 
             style={styles.analysisIcon}
           />
           <Text style={styles.buttonText}>New</Text>
@@ -24,9 +23,8 @@ export default function ActionButtons({ navigation }) {
       <TouchableOpacity style={styles.actionButton}>
         <View style={styles.actionContent}>
           <Ionicons 
-            name="archive-outline" 
+            name="archive" 
             size={24} 
-            color="#FFD700" 
             style={styles.historyIcon}
           />
           <Text style={styles.buttonText}>Defect</Text>
@@ -68,14 +66,14 @@ const styles = StyleSheet.create({
   analysisIcon: {
     fontSize: 50,
     paddingBottom: 10,
-    color: '#FFD700',
+    color: '#76c0df',
     fontWeight: 'bold',
     alignSelf: 'stretch',
   },
   historyIcon: {
     fontSize: 50,
     paddingBottom: 10,
-    color: '#FFD700',
+    color: '#76c0df',
     fontWeight: 'bold',
     alignSelf: 'stretch',
   },
