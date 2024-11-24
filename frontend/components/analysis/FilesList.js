@@ -6,7 +6,7 @@ import { FileItem } from './FileItem';
 export const FilesList = ({ files, onRemoveFile }) => (
   <View style={styles.filesSection}>
     <View style={styles.sectionHeader}>
-      <Ionicons name="document-outline" size={35} color="#FFD700" />
+      <Ionicons name="document" size={35} color="#76c0df" />
       <Text style={styles.sectionTitle}>Uploaded Files</Text>
     </View>
     <ScrollView style={styles.filesList}>

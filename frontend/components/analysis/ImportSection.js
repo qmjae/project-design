@@ -30,7 +30,7 @@ export const ImportSection = ({ onPress }) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <Animated.View style={[styles.importSection, animatedStyle]}>
-        <Ionicons name="cloud-upload-outline" size={50} color="#FFD700" />
+        <Ionicons name="cloud-upload" size={50} color="#76c0df" />
         <Text style={styles.importText}>Import your image</Text>
         <Text style={styles.clickText}>Click to upload</Text>
       </Animated.View>
