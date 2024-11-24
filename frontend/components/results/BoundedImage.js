@@ -4,9 +4,10 @@ import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 
 const DEFECT_COLORS = {
   'short-circuit': 'red',
-  'partial-shading': 'green',
+  'open-circuit': 'green',
   'dust-deposit': 'blue',
-  'bypass-diode': 'orange',
+  'substring': 'purple',
+  'single-cell': 'yellow',
 };
 
 const screenWidth = Dimensions.get('window').width;

@@ -28,7 +28,7 @@ export const ResultCard = memo(({ item, width }) => {
               value={detection?.stressFactors?.join(', ') || 'N/A'} 
             />
             <DetailRow 
-              label="Priority Level" 
+              label="Severity Level" 
               value={detection?.priority || 'N/A'} 
             />
             <DetailRow 

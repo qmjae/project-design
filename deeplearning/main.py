@@ -35,6 +35,7 @@ app.add_middleware(
 try:
     model = YOLO("model/best.pt", task='detect')
     logger.info("Model loaded successfully")
+    logger.info(f"Model classes: {model.names}") 
 except Exception as e:
     logger.error(f"Error loading model: {e}")
     model = None
@@ -110,7 +111,7 @@ async def detect_defects(file: UploadFile = File(...)):
                         "class": class_name,
                         "confidence": round(confidence * 100, 2),
                         "bbox": box.xyxy[0].tolist(),
-                        "priority": defect_info.priorityLevel,
+                        "priority": defect_info.severityLevel,
                         "powerLoss": defect_info.powerLoss,
                         "category": defect_info.category,
                         "stressFactors": defect_info.stressFactors,
@@ -155,7 +156,7 @@ async def get_defect_details(class_name: str):
             return {
                 "className": defect_info.className,
                 "stressFactors": defect_info.stressFactors,
-                "priorityLevel": defect_info.priorityLevel,
+                "severityLevel": defect_info.severityLevel,
                 "powerLoss": defect_info.powerLoss,
                 "category": defect_info.category,
                 "CoA": defect_info.CoA,
