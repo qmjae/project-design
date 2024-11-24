@@ -16,7 +16,7 @@ export const FileItem = memo(({ file, onRemove }) => (
     style={styles.fileItem}
   >
     <View style={styles.fileInfo}>
-      <Ionicons name="image-outline" size={35} color="#FFD700" />
+      <Ionicons name="image-outline" size={35} color="#76c0df" />
       <View style={styles.fileDetails}>
         <Text style={styles.fileName}>{file.name}</Text>
         <Text style={styles.fileSize}>{file.size}</Text>

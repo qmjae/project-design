@@ -7,7 +7,7 @@ import Header from '../components/home/Header';
 import WelcomeSection from '../components/home/WelcomeSection';
 import ActionButtons from '../components/home/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-
+import NotificationSection from '../components/home/NotificationSection';
 export default function HomeScreen({ navigation }) {
   return (
     <BackgroundWrapper>
@@ -17,6 +17,7 @@ export default function HomeScreen({ navigation }) {
           <Header />
           <WelcomeSection />
           <ActionButtons navigation={navigation} />
+          <NotificationSection />
         </View>
       </SafeAreaView>
     </BackgroundWrapper>
