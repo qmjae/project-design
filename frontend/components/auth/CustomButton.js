@@ -19,7 +19,7 @@ const CustomButton = ({ title, handlePress, containerStyles, isLoading }) => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#FFD700', // Change to your preferred button color
+    backgroundColor: '#76c0df', // Change to your preferred button color
     paddingVertical: 12,
     borderRadius: 5,
     alignItems: 'center',

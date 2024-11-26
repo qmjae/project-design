@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   signupLink: {
     fontSize: 18,
     fontWeight: '600',
-    color: 'blue',
+    color: '#FFD700',
     marginLeft: 5,
   },
 });
