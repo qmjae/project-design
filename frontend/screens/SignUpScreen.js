@@ -5,6 +5,7 @@ import FormField from "../components/auth/FormField";
 import CustomButton from "../components/auth/CustomButton";
 import { createUser } from '../../backend/lib/appwrite';
 import { useGlobalContext } from "../../backend/context/GlobalProvider";
+import BackgroundWrapper from "../components/common/BackgroundWrapper";
 
 const SignUpScreen = ({ navigation }) => {
   const { setUser, setIsLogged } = useGlobalContext();
@@ -40,6 +41,7 @@ const SignUpScreen = ({ navigation }) => {
   };
 
   return (
+    <BackgroundWrapper>
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.innerContainer}>
@@ -96,12 +98,13 @@ const SignUpScreen = ({ navigation }) => {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </BackgroundWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     flex: 1,
   },
   scrollView: {

@@ -22,7 +22,7 @@ const LoadingScreen = () => {
   return (
     <View style={styles.container}>
       <Image 
-        source={require('../../assets/logo-name.png')}
+        source={require('../../assets/adlaw-v2.png')}
         style={styles.logo}
       />
     </View>
@@ -37,9 +37,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logo: {
-    width: 150,
+    width: 200,
     height: 200,
     marginBottom: 20,
+    resizeMode: 'contain',
   },
 });
 
