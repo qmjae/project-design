@@ -43,7 +43,7 @@ const SignInScreen = ({ navigation }) => {
         <View style={styles.innerContainer}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("../../assets/logo-name.png")}
+              source={require("../../assets/adlaw-v2.png")}
               resizeMode="contain"
               style={styles.logo}
             />
@@ -117,8 +117,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 120,
-    height: 150,
+    width: 200,
+    height: 200,
   },
   formFieldContainer: {
     marginTop: 28,

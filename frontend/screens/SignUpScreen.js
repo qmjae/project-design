@@ -45,7 +45,7 @@ const SignUpScreen = ({ navigation }) => {
         <View style={styles.innerContainer}>
         <View style={styles.logoContainer}>
             <Image
-              source={require("../../assets/logo.png")}
+              source={require("../../assets/adlaw-logov2.png")}
               resizeMode="contain"
               style={styles.logo}
             />
@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 120,
-    height: 150,
+    width: 165,
+    height: 165,
   },
   title: {
     fontSize: 35,

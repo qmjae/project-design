@@ -11,7 +11,7 @@ export default function Header() {
       <View style={styles.logoContainer}>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <Image 
-            source={require('../../../assets/logo.png')}
+            source={require('../../../assets/adlaw-logov2.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 70,
   },
 }); 
