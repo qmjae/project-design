@@ -1,6 +1,6 @@
 # Adlaw 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/](https://github.com/qmjae/project-design/blob/main/assets/adlaw-v2.png" />
+  <img src="assets/adlaw-v2.png" />
 </p>
 
 This is an application for our design project called "Design of Defective Module Detection for Solar  Panel Thermography Analysis System using Deep Learning". 
