@@ -1,0 +1,38 @@
+# Deep Learning Dependencies
+ultralytics==8.3.34
+torch>=2.0.0
+torchvision>=0.15.0
+
+# API Server
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Image Processing
+Pillow==9.5.0
+numpy==1.24.0
+opencv-python-headless==4.8.0.74
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.4.2
+requests==2.31.0
+
+# Testing
+pytest==7.4.3
+httpx==0.25.0
+
+# Monitoring and Logging
+prometheus-client==0.17.1
+python-json-logger==2.0.7
+
+# Performance and Caching
+redis==5.0.1
+aiofiles==23.2.1
+
+# Development Tools
+black==23.9.1
+flake8==6.1.0
+isort==5.12.0

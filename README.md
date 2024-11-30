@@ -1,6 +1,6 @@
-# Sol Application
+# Adlaw Application
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4edf7709-b06c-4f2d-beed-99010fd4ddb5" />
+  <img src="assets/adlaw-v2.png" />
 </p>
 
 This is an application for our design project called "Design of Defective Module Detection for Solar  Panel Thermography Analysis System using Deep Learning". 
@@ -19,3 +19,17 @@ Specifically, it aims to:
 
 
 This application is built using FastAPI and Ultralytics YOLOv8. Using Appwrite as the backend service and React Native for the mobile application.
+
+
+To install the dependencies, run the following command:
+```
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install requirements
+pip install -r requirements.txt
+
+# For development only
+pip install -r requirements.txt[dev]
+```
