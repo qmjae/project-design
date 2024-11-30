@@ -11,6 +11,14 @@ export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  const handleBack = () => {
+    // Clear the navigation stack and go back to Home
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home' }],
+    });
+  };
+
   const pickImage = async () => {
     if (uploadedFiles.length >= 5) {
       Alert.alert(
@@ -118,7 +126,7 @@ export default function AnalysisScreen({ navigation }) {
   return (
     <BackgroundWrapper>
       <SafeAreaView style={styles.container}>
-        <HeaderAnalysis onBack={() => navigation.goBack()} />
+        <HeaderAnalysis onBack={handleBack} />
         <ImportSection onPress={pickImage} />
         <FilesList 
           files={uploadedFiles}

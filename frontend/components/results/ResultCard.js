@@ -1,11 +1,33 @@
-import React, { memo } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import React, { memo, useState } from 'react';
+import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { BoundedImage } from './BoundedImage';
 import { ModuleInfo } from './ModuleInfo';
 import { DetailRow } from './DetailRow';
 import { Section } from './Section';
+import { useNavigation } from '@react-navigation/native';
+import { useGlobalContext } from '../../../backend/context/GlobalProvider';
+import { saveDefectResult } from '../../../backend/lib/appwrite';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export const ResultCard = memo(({ item, width }) => {
+  const navigation = useNavigation();
+  const { user } = useGlobalContext();
+  const [isResolving, setIsResolving] = useState(false);
+  const [isResolved, setIsResolved] = useState(false);
+
+  const handleResolve = async () => {
+    setIsResolving(true);
+    try {
+      await saveDefectResult(user.$id, item);
+      setIsResolved(true);
+    } catch (error) {
+      console.error('Actual error:', error);
+      Alert.alert('Error', 'Failed to resolve defect');
+    } finally {
+      setIsResolving(false);
+    }
+  };
+
   const detection = item.detections && item.detections[0];
   
   return (
@@ -54,9 +76,22 @@ export const ResultCard = memo(({ item, width }) => {
       </ScrollView>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.resolvedButton}>
-          <Text style={styles.resolvedButtonText}>Resolve</Text>
-        </TouchableOpacity>
+        {isResolved ? (
+          <View style={styles.resolvedStatus}>
+            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            <Text style={styles.resolvedStatusText}>Resolved</Text>
+          </View>
+        ) : (
+          <TouchableOpacity 
+            style={[styles.resolvedButton, isResolving && styles.resolvedButtonDisabled]}
+            onPress={handleResolve}
+            disabled={isResolving}
+          >
+            <Text style={styles.resolvedButtonText}>
+              {isResolving ? 'Resolving...' : 'Resolve'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -112,5 +147,22 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  resolvedButtonDisabled: {
+    backgroundColor: '#CCC',
+  },
+  resolvedStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  resolvedStatusText: {
+    color: '#4CAF50',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 5,
   },
 }); 

@@ -15,7 +15,7 @@ export const config = {
     projectId: '673b75b2002d26a0e0f3',
     databaseId: '673b76c900338dd6f5e1',
     userCollectionId: '673b76f500316bf6fa4a',
-    photosCollectionId: '673b7710002a02939731',
+    defectHistoryCollectionId: '674a7d90003e2b193910',
     storageId: '673b791b0023456a4a07',
 }
 
@@ -112,30 +112,116 @@ export async function signOut() {
     }
   }
 
-  export async function uploadFilesToAppwrite(files) {
-    if (!files || files.length === 0) return;
+export async function uploadFilesToAppwrite(files) {
+if (!files || files.length === 0) return;
 
-    try {
-        const uploadedFiles = await Promise.all(files.map(async (file) => {
-            const fileData = {
-                uri: file.imageUri,
-                name: file.name,
-                type: file.type,
-                size: file.size,
-            };
+try {
+    const uploadedFiles = await Promise.all(files.map(async (file) => {
+        const fileData = {
+            uri: file.imageUri,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+        };
 
-            const uploadedFile = await storage.createFile(
-                config.storageId,
-                ID.unique(),
-                fileData
-            );
+        const uploadedFile = await storage.createFile(
+            config.storageId,
+            ID.unique(),
+            fileData
+        );
 
-            return uploadedFile;
-        }));
+        return uploadedFile;
+    }));
 
-        return uploadedFiles;
-    } catch (error) {
-        console.error('Error uploading files:', error);
-        throw new Error('Failed to upload images. Please try again.');
-    }
+    return uploadedFiles;
+} catch (error) {
+    console.error('Error uploading files:', error);
+    throw new Error('Failed to upload images. Please try again.');
+}
 };
+
+export async function saveDefectResult(userId, result) {
+  try {
+    if (!userId) throw new Error('User ID is required');
+    if (!result) throw new Error('Result object is required');
+    
+    const detection = result.detections?.[0];
+    
+    // First, upload the image to Appwrite Storage
+    let storageImageUrl = '';
+    if (result.imageUri) {
+      try {
+        console.log('Starting image upload for:', result.imageUri);
+        
+        // Create file data for upload
+        const fileData = {
+          uri: result.imageUri,
+          name: result.fileName || 'defect-image.jpg',
+          type: 'image/jpeg',
+          size: result.sizeOriginal || undefined
+        };
+
+        // Generate a unique ID for the file and use the same ID for both operations
+        const fileId = ID.unique();
+        
+        const uploadedFile = await storage.createFile(
+          config.storageId,
+          fileId,  // Use the same fileId here
+          fileData
+        );
+
+        console.log('File uploaded successfully:', uploadedFile);
+
+        if (!uploadedFile) {
+          throw new Error('File upload failed - no response');
+        }
+
+        // Use the same fileId in the URL
+        storageImageUrl = `${config.endpoint}/storage/buckets/${config.storageId}/files/${fileId}/view?project=${config.projectId}`;
+
+        console.log('Generated storage URL:', storageImageUrl);
+      } catch (uploadError) {
+        console.error('Image upload error:', uploadError);
+      }
+    }
+    
+    const documentData = {
+      userId: userId,
+      imageUrl: storageImageUrl,
+      defectClass: detection?.class || 'Unknown',
+      priority: detection?.priority || 'N/A',
+      DateTime: new Date().toISOString(),
+      fileName: result.fileName || '',
+      description: detection?.description || '',
+    };
+    
+    console.log('Saving document with data:', documentData);
+    
+    const document = await databases.createDocument(
+      config.databaseId,
+      config.defectHistoryCollectionId,
+      ID.unique(),
+      documentData
+    );
+    return document;
+  } catch (error) {
+    console.error('SaveDefectResult detailed error:', error);
+    throw new Error(`saveDefectResult error: ${error.message}`);
+  }
+}
+
+export async function getDefectHistory(userId) {
+  try {
+    const response = await databases.listDocuments(
+      config.databaseId,
+      config.defectHistoryCollectionId,
+      [
+        Query.equal('userId', userId),
+        Query.orderDesc('$createdAt'),
+      ]
+    );
+    return response.documents;
+  } catch (error) {
+    throw new Error(`getDefectHistory error: ${error.message}`);
+  }
+}

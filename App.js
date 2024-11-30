@@ -9,6 +9,7 @@ import SignInScreen from './frontend/screens/SignInScreen';
 import SignUpScreen from './frontend/screens/SignUpScreen';
 import GlobalProvider from './backend/context/GlobalProvider';
 import ProfileScreen from './frontend/screens/ProfileScreen';
+import DefectHistoryScreen from './frontend/screens/DefectHistoryScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
           <Stack.Screen name="Analysis" component={AnalysisScreen} />
           <Stack.Screen name="Results" component={ResultsScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="DefectHistory" component={DefectHistoryScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       </GlobalProvider>

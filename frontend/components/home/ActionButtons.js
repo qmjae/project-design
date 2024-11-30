@@ -20,7 +20,10 @@ export default function ActionButtons({ navigation }) {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.actionButton}>
+      <TouchableOpacity 
+        style={styles.actionButton}
+        onPress={() => navigation.navigate('DefectHistory')}
+      >
         <View style={styles.actionContent}>
           <Ionicons 
             name="archive" 
