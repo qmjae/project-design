@@ -1,6 +1,6 @@
-# Sol Application
+# Adlaw 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4edf7709-b06c-4f2d-beed-99010fd4ddb5" />
+  <img src="https://github.com/user-attachments/assets/](https://github.com/qmjae/project-design/blob/main/assets/adlaw-v2.png" />
 </p>
 
 This is an application for our design project called "Design of Defective Module Detection for Solar  Panel Thermography Analysis System using Deep Learning". 
