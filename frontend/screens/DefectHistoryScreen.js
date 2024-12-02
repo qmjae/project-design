@@ -66,7 +66,7 @@ export default function DefectHistoryScreen({ navigation }) {
                 <Text style={styles.value}>{selectedDefect.defectClass || 'Unknown'}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.label}>Priority:</Text>
+                <Text style={styles.label}>Severity:</Text>
                 <Text style={[
                   styles.value, 
                   styles.priority,

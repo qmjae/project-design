@@ -79,7 +79,7 @@ export default function AnalysisScreen({ navigation }) {
             name: file.name
           });
 
-          const response = await fetch('http://192.168.1.56:8000/detect/', {
+          const response = await fetch('https://adlaw-api.onrender.com/detect/', {
             method: 'POST',
             body: formData,
             headers: {

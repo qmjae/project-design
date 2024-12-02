@@ -16,9 +16,6 @@ const SignInScreen = ({ navigation }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submitForm = async () => {
-    if (form.email === "" || form.password === "") {
-      Alert.alert('Missing fields', 'Please fill in all the fields');
-    }
 
     setIsSubmitting(true);
     
