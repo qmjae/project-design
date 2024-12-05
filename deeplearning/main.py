@@ -98,10 +98,6 @@ async def detect_defects(file: UploadFile = File(...)):
                 confidence = float(box.conf[0])
                 logger.info(f"Confidence: {confidence}")  # Debug log
                 
-                # Skip low confidence detections
-                if confidence < 0.5:
-                    logger.info(f"Skipping detection due to low confidence: {confidence}")  # Debug log
-                    continue
                     
                 defect_info = get_defect_info(class_name)
                 logger.info(f"Defect info: {defect_info}")  # Debug log
