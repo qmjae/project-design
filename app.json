@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sol-application",
+    "name": "Adlaw",
     "slug": "sol-application",
     "plugins": [
       [
@@ -15,7 +15,7 @@
     "icon": "./assets/adlaw-logov2.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/adlaw-logov2.png",
+      "image": "./assets/adlaw-v2.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
