@@ -17,7 +17,7 @@ Specifically, it aims to:
 3. Test and evaluate the accuracy of the prototype.
 
 
-This application is built using FastAPI and Ultralytics YOLOv8 hosted on Render. Using Appwrite as the backend service and React Native as the frontend for the mobile application.
+This application is built using FastAPI and Ultralytics YOLOv8 hosted on Render. Using Appwrite as the backend service and React Native as the frontend for the mobile application and Expo Go SDK 51 for development, production and deployment.
 
 
 To install the dependencies, run the following command:
