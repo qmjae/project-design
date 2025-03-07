@@ -79,7 +79,7 @@ export default function AnalysisScreen({ navigation }) {
             name: file.name
           });
 
-          const response = await fetch('http://127.0.0.1:8000/detect/', {
+          const response = await fetch('http://192.168.1.16:8000/detect/', {
             method: 'POST',
             body: formData,
             headers: {
