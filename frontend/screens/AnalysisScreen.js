@@ -79,7 +79,7 @@ export default function AnalysisScreen({ navigation }) {
             name: file.name
           });
 
-          const response = await fetch('https://6cac-112-201-131-247.ngrok-free.app/detect/', {
+          const response = await fetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/', {
             method: 'POST',
             body: formData,
             headers: {
