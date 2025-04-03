@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Alert, Dimensions } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
+import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderResults } from '../components/results/HeaderResults';
 import { ResultCard } from '../components/results/ResultCard';
 import { PaginationDots } from '../components/results/PaginationDots';
@@ -12,22 +13,26 @@ const PAGE_PADDING = 16;
 
 export default function ResultsScreen({ route }) {
   const navigation = useNavigation();
-  const { analysisResults } = route.params;
+  const { notificationId, analysisResults } = route.params;
+  const { updateNotificationType } = useGlobalContext();
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
   const handleBack = () => {
     Alert.alert(
       "Leave Results",
-      "Are you sure you want to go back? Your results will not be saved.",
+      "Are you sure? Only resolved results will be saved.",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Leave",
           style: "destructive",
           onPress: () => {
+            if (notificationId) {
+              updateNotificationType(notificationId, 'Unresolved');
+            }
             navigation.reset({
               index: 0,
-              routes: [{ name: 'Analysis' }],
+              routes: [{ name: 'Home' }],
             });
           }
         }
@@ -50,6 +55,7 @@ export default function ResultsScreen({ route }) {
                 <ResultCard
                   item={item}
                   width={PAGE_WIDTH - (PAGE_PADDING * 2)}
+                  notificationId={notificationId}
                 />
               </View>
             )}

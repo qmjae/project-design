@@ -9,9 +9,9 @@ import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { saveDefectResult } from '../../../backend/lib/appwrite';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export const ResultCard = memo(({ item, width }) => {
+export const ResultCard = memo(({ item, width, notificationId }) => {
   const navigation = useNavigation();
-  const { user } = useGlobalContext();
+  const { user, updateNotificationType } = useGlobalContext();
   const [isResolving, setIsResolving] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
 
@@ -20,6 +20,7 @@ export const ResultCard = memo(({ item, width }) => {
     try {
       await saveDefectResult(user.$id, item);
       setIsResolved(true);
+      updateNotificationType(notificationId, "Resolved")
     } catch (error) {
       console.error('Actual error:', error);
       Alert.alert('Error', 'Failed to resolve defect');

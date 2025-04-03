@@ -31,7 +31,6 @@ export default function WelcomeSection() {
 const styles = StyleSheet.create({
   welcomeSection: {
     padding: 24,
-    paddingTop: 50,
   },
   welcomeText: {
     fontSize: 48,
