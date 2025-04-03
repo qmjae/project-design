@@ -6,7 +6,8 @@ import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { getDefectHistory, databases } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 
-export default function DefectHistoryScreen({ navigation }) {
+export default function DefectHistoryScreen({ navigation, route }) {
+  const { notificationId, fileName } = route.params || {}
   const [defectHistory, setDefectHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDefect, setSelectedDefect] = useState(null);
@@ -20,6 +21,14 @@ export default function DefectHistoryScreen({ navigation }) {
     try {
       const history = await getDefectHistory(user.$id);
       setDefectHistory(history);
+      // Check if coming from notification
+      if (notificationId && fileName) {
+        const matchedDefects = history.filter((item) => item.fileName === fileName);
+        if (matchedDefects.length > 0) {
+          matchedDefects.sort((a, b) => new Date(b.DateTime) - new Date(a.DateTime));
+          setSelectedDefect(matchedDefects[0]);
+        }
+      }
     } catch (error) {
       console.error('Error fetching defect history:', error);
     } finally {
@@ -37,6 +46,14 @@ export default function DefectHistoryScreen({ navigation }) {
     });
   };
 
+  const handleOnBack = () => {
+    if (notificationId && fileName) {
+      navigation.navigate('Home');
+    } else {
+      setSelectedDefect(null);
+    }
+  };
+
   const renderItem = ({ item }) => (
     <HistoryCard 
       defect={item}
@@ -49,7 +66,7 @@ export default function DefectHistoryScreen({ navigation }) {
       <BackgroundWrapper>
         <SafeAreaView style={styles.container}>
           <HeaderHistory 
-            onBack={() => setSelectedDefect(null)} 
+            onBack={handleOnBack}
             title={selectedDefect.defectClass || 'Defect Details'} 
           />
           <ScrollView style={styles.content}>
