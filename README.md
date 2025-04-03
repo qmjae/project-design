@@ -54,3 +54,8 @@ choco install ngrok
 ngrok config add-authtoken <TOKEN>
 ngrok http --url=yeti-fleet-distinctly.ngrok-free.app 8000
 ```
+If ngrok won't run, change DNS to:
+```
+8.8.8.8
+4.4.4.4
+```
