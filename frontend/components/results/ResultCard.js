@@ -14,15 +14,42 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
   const { user, updateNotificationType } = useGlobalContext();
   const [isResolving, setIsResolving] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
+  const [savedDocumentId, setSavedDocumentId] = useState(null);
 
   const handleResolve = async () => {
     setIsResolving(true);
     try {
-      await saveDefectResult(user.$id, item);
-      setIsResolved(true);
-      updateNotificationType(notificationId, "Resolved")
+      // Log what we're working with
+      console.log('Resolving item:', item);
+      console.log('Initial notificationId:', notificationId);
+      
+      // Choose which ID to update based on what's available
+      let idToUpdate = notificationId;
+      
+      // If we don't have a notification ID, create a new document and use its ID
+      if (!idToUpdate) {
+        console.log('No notification ID provided, saving as new defect result');
+        const savedResult = await saveDefectResult(user.$id, item);
+        console.log('Saved new defect with ID:', savedResult.$id);
+        
+        // Use the newly created document's ID
+        idToUpdate = savedResult.$id;
+        setSavedDocumentId(idToUpdate);
+      } else {
+        // If we already have a notification ID, just update its status
+        console.log('Updating existing notification:', idToUpdate);
+      }
+      
+      // Now update the status with the appropriate ID
+      if (idToUpdate) {
+        await updateNotificationType(idToUpdate, "Resolved");
+        console.log('Status updated successfully');
+        setIsResolved(true);
+      } else {
+        throw new Error('Failed to get a valid document ID for update');
+      }
     } catch (error) {
-      console.error('Actual error:', error);
+      console.error('Error in handleResolve:', error);
       Alert.alert('Error', 'Failed to resolve defect');
     } finally {
       setIsResolving(false);
@@ -97,6 +124,8 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
     </View>
   );
 });
+
+// Rest of your styles remain the same...
 
 const styles = StyleSheet.create({
   resultCard: {

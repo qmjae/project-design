@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { getCurrentUser } from "../lib/appwrite";
+import { getCurrentUser, updateDefectStatus } from "../lib/appwrite";
 
 const GlobalContext = createContext();
 export const useGlobalContext = () => useContext(GlobalContext);
@@ -38,14 +38,41 @@ const GlobalProvider = ({ children }) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
   };
 
-  const updateNotificationType = (id, newType) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === id
-          ? { ...notification, type: newType }
-          : notification
-      )
-    );
+  // Improved updateNotificationType function
+  const updateNotificationType = async (id, newType) => {
+    try {
+      console.log(`Updating notification - ID: "${id}", Type: "${newType}"`);
+      
+      // Check if ID is valid before proceeding
+      if (!id) {
+        console.error("Invalid notification ID: cannot update status");
+        return;
+      }
+      
+      // First update the local state
+      setNotifications(prevNotifications =>
+        prevNotifications.map(notification => 
+          notification.id === id ? { ...notification, type: newType } : notification
+        )
+      );
+      
+      // Convert the notification type to the appropriate status enum value
+      let statusValue = 'pending'; // Default
+      if (newType === 'Resolved') {
+        statusValue = 'resolved';
+      }
+      
+      console.log(`Converting notification type "${newType}" to status "${statusValue}"`);
+      
+      // Call the utility function to update the database
+      await updateDefectStatus(id, statusValue);
+      
+      console.log(`Successfully updated document ${id} with status: ${statusValue}`);
+      
+    } catch (error) {
+      console.error('Error updating notification type:', error);
+      // Don't throw the error here - we want the app to continue functioning
+    }
   };
 
   return (
