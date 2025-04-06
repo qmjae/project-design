@@ -35,7 +35,13 @@ const GlobalProvider = ({ children }) => {
   };
 
   const removeNotification = (id) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    try{
+        setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    }
+    catch(error){
+        console.error('Error removing notification:', error);
+    }
+    
   };
 
   // Improved updateNotificationType function

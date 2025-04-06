@@ -27,6 +27,6 @@ const styles = {
   contentContainer: {
     flex: 1,
     padding: 20,
-    paddingBottom: 75, // Add padding to avoid overlap with bottom navigation
+    paddingBottom: 50, // Add padding to avoid overlap with bottom navigation
   }
 };
