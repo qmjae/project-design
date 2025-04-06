@@ -2,117 +2,121 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export default function ActionButtons({ navigation }) {
+export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
   return (
-    <View style={styles.actionButtonsContainer}>
+    <View style={styles.bottomNavContainer}>
       <TouchableOpacity 
-        style={styles.actionButton}
+        style={[styles.navItem, currentScreen === 'Home' && styles.activeNavItem]}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Ionicons 
+          name="home" 
+          size={24} 
+          color={currentScreen === 'Home' ? '#76c0df' : '#666'}
+        />
+        <Text style={[styles.navText, currentScreen === 'Home' && styles.activeNavText]}>Home</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={[styles.navItem, currentScreen === 'Analysis' && styles.activeNavItem]}
         onPress={() => navigation.navigate('Analysis')}
       >
-        <View style={styles.actionContent}>
-          <Ionicons 
-            name="add-circle" 
-            size={24} 
-            style={styles.analysisIcon}
-          />
-          <Text style={styles.buttonText}>New</Text>
-          <Text style={styles.buttonText}>Analysis</Text>
-        </View>
+        <Ionicons 
+          name="add-circle" 
+          size={24} 
+          color={currentScreen === 'Analysis' ? '#76c0df' : '#666'}
+        />
+        <Text style={[styles.navText, currentScreen === 'Analysis' && styles.activeNavText]}>Analysis</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
-        style={styles.actionButton}
-        onPress={() => navigation.navigate('DefectHistory')}
+        style={styles.cameraButton}
+        onPress={() => navigation.navigate('ThermalCamera')}
       >
-        <View style={styles.actionContent}>
-          <Ionicons 
-            name="archive" 
-            size={24} 
-            style={styles.historyIcon}
-          />
-          <Text style={styles.buttonText}>Defect</Text>
-          <Text style={styles.buttonText}>History</Text>
-        </View>
+        <Ionicons name="camera" size={28} color="#fff" />
       </TouchableOpacity>
-      <View style={styles.cameraButtonContainer}>
-        <TouchableOpacity 
-          style={styles.cameraButton}
-          onPress={() => navigation.navigate('ThermalCamera')}
-        >
-          <Ionicons 
-            name="camera" 
-            size={32} 
-            color="#fff"
-          />
-        </TouchableOpacity>
-      </View>
+      
+      <TouchableOpacity 
+        style={[styles.navItem, currentScreen === 'DefectHistory' && styles.activeNavItem]}
+        onPress={() => navigation.navigate('DefectHistory', { notificationId: null, fileName: null })}
+      >
+        <Ionicons 
+          name="archive" 
+          size={24} 
+          color={currentScreen === 'DefectHistory' ? '#76c0df' : '#666'}
+        />
+        <Text style={[styles.navText, currentScreen === 'DefectHistory' && styles.activeNavText]}>History</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={[styles.navItem, currentScreen === 'Notifications' && styles.activeNavItem]}
+        onPress={() => navigation.navigate('Notifications')}
+      >
+        <Ionicons 
+          name="notifications" 
+          size={24} 
+          color={currentScreen === 'Notifications' ? '#76c0df' : '#666'}
+        />
+        <Text style={[styles.navText, currentScreen === 'Notifications' && styles.activeNavText]}>Alerts</Text>
+      </TouchableOpacity>
     </View>
-    
   );
 }
 
 const styles = StyleSheet.create({
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    paddingHorizontal: 25,
-    flexWrap: 'wrap',
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    paddingHorizontal: 30,
-    paddingVertical: 35,
-    marginHorizontal: 5,
-  },
-  buttonText: {
-    fontSize: 24,
-    color: '#FFD700',
-    fontWeight: 'bold',
-    alignSelf: 'stretch',
-  },
-  analysisIcon: {
-    fontSize: 50,
-    paddingBottom: 10,
-    color: '#76c0df',
-    fontWeight: 'bold',
-    alignSelf: 'stretch',
-  },
-  historyIcon: {
-    fontSize: 50,
-    paddingBottom: 10,
-    color: '#76c0df',
-    fontWeight: 'bold',
-    alignSelf: 'stretch',
-  },
-  cameraButtonContainer: {
+  bottomNavContainer: {
     position: 'absolute',
-    bottom: '-200%',
-    left: '50%',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    height: 65,
+    paddingBottom: 8,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 10,
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  activeNavItem: {
+    borderTopWidth: 3,
+    borderTopColor: '#76c0df',
+    paddingTop: 3,
+  },
+  navText: {
+    fontSize: 12,
+    marginTop: 3,
+    color: '#666',
+  },
+  activeNavText: {
+    color: '#76c0df',
+    fontWeight: 'bold',
   },
   cameraButton: {
     backgroundColor: '#76c0df',
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderWidth: 3,
+    borderColor: '#fff',
   },
-}); 
+});

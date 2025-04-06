@@ -7,7 +7,8 @@ import Header from '../components/home/Header';
 import WelcomeSection from '../components/home/WelcomeSection';
 import ActionButtons from '../components/home/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-import NotificationSection from '../components/home/NotificationSection';
+// We'll move the NotificationSection to its own screen
+
 export default function HomeScreen({ navigation }) {
   return (
     <BackgroundWrapper>
@@ -16,9 +17,12 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.container}>
           <Header />
           <WelcomeSection />
-          <ActionButtons navigation={navigation} />
-          <NotificationSection />
+          {/* Here you would add your dashboard/analytics content */}
+          <View style={styles.dashboardContainer}>
+            {/* Dashboard content will go here */}
+          </View>
         </View>
+        <ActionButtons navigation={navigation} currentScreen="Home" />
       </SafeAreaView>
     </BackgroundWrapper>
   );
@@ -26,13 +30,18 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1, // Ensures the SafeAreaView fills the entire screen
-    backgroundColor: 'transparent', // Sets the background color to white
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Adjusts for Android status bar height
-    paddingVertical: 25, // Adds vertical padding for content spacing
+    flex: 1,
+    backgroundColor: 'transparent',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
-    flex: 1, // Fills the available space in the safe area
-    backgroundColor: 'transparent', // Adds a semi-transparent white background
+    flex: 1,
+    backgroundColor: 'transparent',
+    paddingBottom: 65, // Add space for bottom navigation
+  },
+  dashboardContainer: {
+    flex: 1,
+    padding: 20,
+    // Add styling for your dashboard content
   },
 });
