@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import Header from '../components/home/Header';
 import WelcomeSection from '../components/home/WelcomeSection';
-import ActionButtons from '../components/home/ActionButtons';
+import ActionButtons from '../components/navigation/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import { globalStyles } from '../styles/globalStyles';
 

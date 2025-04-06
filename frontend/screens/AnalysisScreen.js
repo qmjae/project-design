@@ -8,7 +8,7 @@ import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-import ActionButtons from '../components/home/ActionButtons';
+import ActionButtons from '../components/navigation/ActionButtons';
 import { globalStyles, colors, shadows } from '../styles/globalStyles';
 
 export default function AnalysisScreen({ navigation }) {

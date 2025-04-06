@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import NotificationSection from '../components/notification/NotificationSection';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-import ActionButtons from '../components/home/ActionButtons';
+import ActionButtons from '../components/navigation/ActionButtons';
 import { globalStyles } from '../styles/globalStyles';
 
 export default function NotificationsScreen({ navigation }) {

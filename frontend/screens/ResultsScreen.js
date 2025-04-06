@@ -8,7 +8,7 @@ import { PaginationDots } from '../components/results/PaginationDots';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ActionButtons from '../components/home/ActionButtons';
+import ActionButtons from '../components/navigation/ActionButtons';
 import { globalStyles } from '../styles/globalStyles';
 
 const PAGE_WIDTH = Dimensions.get('window').width;

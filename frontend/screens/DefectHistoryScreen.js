@@ -5,7 +5,7 @@ import { HistoryCard } from '../components/history/HistoryCard';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { getDefectHistory } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-import ActionButtons from '../components/home/ActionButtons';
+import ActionButtons from '../components/navigation/ActionButtons';
 import { globalStyles, colors, borderRadius, shadows } from '../styles/globalStyles';
 
 export default function DefectHistoryScreen({ navigation, route }) {
