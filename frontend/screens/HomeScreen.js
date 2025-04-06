@@ -1,38 +1,27 @@
 import React from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 import Header from '../components/home/Header';
 import WelcomeSection from '../components/home/WelcomeSection';
-import ActionButtons from '../components/home/ActionButtons';
+import DashboardSection from '../components/home/DashboardSection';
+import ActionButtons from '../components/navigation/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-import NotificationSection from '../components/home/NotificationSection';
+import { globalStyles } from '../styles/globalStyles';
+
 export default function HomeScreen({ navigation }) {
   return (
     <BackgroundWrapper>
       <StatusBar style="dark" />
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.container}>
+      <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
+        <ScrollView style={globalStyles.container} showsVerticalScrollIndicator={false}>
           <Header />
           <WelcomeSection />
-          <ActionButtons navigation={navigation} />
-          <NotificationSection />
-        </View>
+          <DashboardSection />
+        </ScrollView>
+        <ActionButtons navigation={navigation} currentScreen="Home" />
       </SafeAreaView>
     </BackgroundWrapper>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1, // Ensures the SafeAreaView fills the entire screen
-    backgroundColor: 'transparent', // Sets the background color to white
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Adjusts for Android status bar height
-    paddingVertical: 25, // Adds vertical padding for content spacing
-  },
-  container: {
-    flex: 1, // Fills the available space in the safe area
-    backgroundColor: 'transparent', // Adds a semi-transparent white background
-  },
-});

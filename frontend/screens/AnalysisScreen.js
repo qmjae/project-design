@@ -1,22 +1,35 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
+import { SafeAreaView, TouchableOpacity, Text, Alert, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { StatusBar } from 'expo-status-bar';
+import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
+import ActionButtons from '../components/navigation/ActionButtons';
+import { globalStyles, colors, shadows } from '../styles/globalStyles';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { setAnalysisResults, addNotification } = useGlobalContext();
 
-  const handleBack = () => {
-    // Clear the navigation stack and go back to Home
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+  const formatDateTime = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? String(hours).padStart(2, '0') : '12';
+
+    return `${month}-${day}-${year} ${hours}:${minutes} ${ampm}`;
   };
 
   const pickImage = async () => {
@@ -107,6 +120,19 @@ export default function AnalysisScreen({ navigation }) {
 
       console.log('Final analysis results:', analysisResults);
 
+      analysisResults.forEach((file) => {
+        if (file.detections && file.detections.length > 0) {
+          addNotification({
+            id: file.uploadId,
+            type: 'Detected',
+            priority: file.detections[0].priority.match(/^(\d+)/)?.[0],
+            datetime: formatDateTime(new Date()),
+            name: file.fileName,
+            file: [file],
+          });
+        }
+      });
+
       navigation.navigate('Results', { 
         files: uploadedFiles,
         analysisResults: analysisResults 
@@ -125,51 +151,48 @@ export default function AnalysisScreen({ navigation }) {
 
   return (
     <BackgroundWrapper>
-      <SafeAreaView style={styles.container}>
-        <HeaderAnalysis onBack={handleBack} />
-        <ImportSection onPress={pickImage} />
-        <FilesList 
-          files={uploadedFiles}
-          onRemoveFile={removeFile}
-        />
-        <TouchableOpacity 
-          style={[
-            styles.resultsButton,
-            (uploadedFiles.length === 0 || isAnalyzing) && styles.resultsButtonDisabled
-          ]}
-          onPress={handleResults}
-          disabled={uploadedFiles.length === 0 || isAnalyzing}
-        >
-          <Text style={styles.resultsButtonText}>
-            {isAnalyzing ? 'Analyzing...' : 'Results'}
-          </Text>
-        </TouchableOpacity>
+      <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
+      <View style={styles.contentContainer}>
+        <HeaderAnalysis />
+          <ImportSection onPress={pickImage} />
+          <FilesList 
+            files={uploadedFiles}
+            onRemoveFile={removeFile}
+          />
+          <TouchableOpacity 
+            style={[
+              styles.resultsButton,
+              (uploadedFiles.length === 0 || isAnalyzing) && styles.resultsButtonDisabled
+            ]}
+            onPress={handleResults}
+            disabled={uploadedFiles.length === 0 || isAnalyzing}
+          >
+            <Text style={styles.resultsButtonText}>
+              {isAnalyzing ? 'Analyzing...' : 'Results'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <ActionButtons navigation={navigation} currentScreen="Analysis" />
       </SafeAreaView>
     </BackgroundWrapper>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = {
+  contentContainer: {
     flex: 1,
-    backgroundColor: 'transparent',
     padding: 20,
+    paddingBottom: 90, // Add padding to avoid overlap with bottom navigation
   },
   resultsButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#76c0df',
+    backgroundColor: colors.primary,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 10, // Add some bottom margin
+    ...shadows.light,
   },
   resultsButtonText: {
     color: '#fff',
@@ -179,4 +202,4 @@ const styles = StyleSheet.create({
   resultsButtonDisabled: {
     backgroundColor: '#D3D3D3',
   },
-}); 
+};

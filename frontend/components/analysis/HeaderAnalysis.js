@@ -6,12 +6,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 export const HeaderAnalysis = ({ onBack }) => (
   <SafeAreaView>
     <View style={styles.header}>
-      <TouchableOpacity 
-        onPress={onBack}
-        style={styles.backButton}
-      >
-      <Ionicons name="arrow-back" size={40} color="black" />
-      </TouchableOpacity>
     <View style={styles.headerTitleContainer}>
       <Text style={styles.headerTitle}>Analysis</Text>
     </View>
@@ -38,7 +32,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
       fontSize: 29,
-      fontWeight: '500',
+      fontWeight: 'bold',
       color: '#FFD700',
     },
   });

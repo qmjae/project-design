@@ -16,10 +16,6 @@ export default function Header() {
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuButton}>
-        <Ionicons name="menu-outline" size={40} color="black" />
-        </TouchableOpacity>
-        
       </View>
     </View>
   );
@@ -29,9 +25,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 2,
-    height: 56,
+    height: "10%",
   },
   logoContainer: {
     position: 'absolute',

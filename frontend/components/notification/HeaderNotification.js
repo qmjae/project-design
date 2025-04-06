@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { globalStyles, colors } from '../../styles/globalStyles';
 
-export function HeaderHistory({ onBack, title = 'Defect History', showBackButton = false }) {
+export function HeaderNotification({ onBack, title = 'Notifications', showBackButton = false }) {
   return (
     <View style={styles.header}>
       <View style={styles.headerContent}>
@@ -23,10 +23,11 @@ export function HeaderHistory({ onBack, title = 'Defect History', showBackButton
 
 const styles = StyleSheet.create({
   header: {
-    paddingVertical: 30,
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
+    marginBottom: 25,
+    paddingVertical: 5,
   },
   headerContent: {
     flexDirection: 'row',
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: "#FFD700",
+    color:  "#FFD700",
     textAlign: 'center',
     width: '100%',
   },
