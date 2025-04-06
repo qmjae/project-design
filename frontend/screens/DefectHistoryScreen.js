@@ -134,7 +134,7 @@ export default function DefectHistoryScreen({ navigation, route }) {
 
 const styles = {
   containerPadding: {
-    padding: 20,
+    padding: 10,
   },
   content: {
     flex: 1,
@@ -150,7 +150,6 @@ const styles = {
     borderRadius: borderRadius.m,
     padding: 15,
     ...shadows.light,
-    marginBottom: 70, // Add space at the bottom for the navigation
   },
   detailRow: {
     flexDirection: 'row',

@@ -43,8 +43,8 @@ export default function ResultsScreen({ route }) {
   return (
     <BackgroundWrapper>
       <View style={styles.container}>
+      <View style={styles.cardsContainer}>
         <HeaderResults onBack={handleBack} />
-        <View style={styles.cardsContainer}>
           <Carousel
             loop={false}
             width={PAGE_WIDTH}

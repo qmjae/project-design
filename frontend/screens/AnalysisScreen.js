@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, TouchableOpacity, Text, Alert } from 'react-native';
+import { SafeAreaView, TouchableOpacity, Text, Alert, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { StatusBar } from 'expo-status-bar';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
@@ -15,14 +15,6 @@ export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { setAnalysisResults, addNotification } = useGlobalContext();
-
-  const handleBack = () => {
-    // Clear the navigation stack and go back to Home
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
-  };
 
   const formatDateTime = (date) => {
     const year = date.getFullYear();
@@ -161,24 +153,26 @@ export default function AnalysisScreen({ navigation }) {
     <BackgroundWrapper>
       <StatusBar style="dark" />
       <SafeAreaView style={globalStyles.safeArea}>
+      <View style={styles.contentContainer}>
         <HeaderAnalysis />
-        <ImportSection onPress={pickImage} />
-        <FilesList 
-          files={uploadedFiles}
-          onRemoveFile={removeFile}
-        />
-        <TouchableOpacity 
-          style={[
-            styles.resultsButton,
-            (uploadedFiles.length === 0 || isAnalyzing) && styles.resultsButtonDisabled
-          ]}
-          onPress={handleResults}
-          disabled={uploadedFiles.length === 0 || isAnalyzing}
-        >
-          <Text style={styles.resultsButtonText}>
-            {isAnalyzing ? 'Analyzing...' : 'Results'}
-          </Text>
-        </TouchableOpacity>
+          <ImportSection onPress={pickImage} />
+          <FilesList 
+            files={uploadedFiles}
+            onRemoveFile={removeFile}
+          />
+          <TouchableOpacity 
+            style={[
+              styles.resultsButton,
+              (uploadedFiles.length === 0 || isAnalyzing) && styles.resultsButtonDisabled
+            ]}
+            onPress={handleResults}
+            disabled={uploadedFiles.length === 0 || isAnalyzing}
+          >
+            <Text style={styles.resultsButtonText}>
+              {isAnalyzing ? 'Analyzing...' : 'Results'}
+            </Text>
+          </TouchableOpacity>
+        </View>
         <ActionButtons navigation={navigation} currentScreen="Analysis" />
       </SafeAreaView>
     </BackgroundWrapper>
@@ -186,6 +180,11 @@ export default function AnalysisScreen({ navigation }) {
 }
 
 const styles = {
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+    paddingBottom: 75, // Add padding to avoid overlap with bottom navigation
+  },
   resultsButton: {
     alignSelf: 'flex-end',
     backgroundColor: colors.primary,
@@ -193,6 +192,7 @@ const styles = {
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+    marginBottom: 10, // Add some bottom margin
     ...shadows.light,
   },
   resultsButtonText: {
