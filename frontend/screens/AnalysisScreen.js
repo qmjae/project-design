@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
@@ -10,6 +11,7 @@ import BackgroundWrapper from '../components/common/BackgroundWrapper';
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { setAnalysisResults, addNotification } = useGlobalContext();
 
   const handleBack = () => {
     // Clear the navigation stack and go back to Home
@@ -17,6 +19,22 @@ export default function AnalysisScreen({ navigation }) {
       index: 0,
       routes: [{ name: 'Home' }],
     });
+  };
+
+  const formatDateTime = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? String(hours).padStart(2, '0') : '12';
+
+    return `${month}-${day}-${year} ${hours}:${minutes} ${ampm}`;
   };
 
   const pickImage = async () => {
@@ -106,6 +124,19 @@ export default function AnalysisScreen({ navigation }) {
       );
 
       console.log('Final analysis results:', analysisResults);
+
+      analysisResults.forEach((file) => {
+        if (file.detections && file.detections.length > 0) {
+          addNotification({
+            id: file.uploadId,
+            type: 'Detected',
+            priority: file.detections[0].priority.match(/^(\d+)/)?.[0],
+            datetime: formatDateTime(new Date()),
+            name: file.fileName,
+            file: [file],
+          });
+        }
+      });
 
       navigation.navigate('Results', { 
         files: uploadedFiles,

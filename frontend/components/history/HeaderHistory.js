@@ -1,9 +1,13 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export const HeaderHistory = ({ onBack, title = "History" }) => {
+  const navigation = useNavigation();
+  const handleBack = onBack || (() => navigation.goBack());
+
   return (
     <SafeAreaView>
       <View style={styles.header}>
