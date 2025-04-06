@@ -7,6 +7,7 @@ import { getDefectHistory } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import ActionButtons from '../components/navigation/ActionButtons';
 import { globalStyles, colors, borderRadius, shadows } from '../styles/globalStyles';
+import { StatusBar } from 'expo-status-bar';
 
 export default function DefectHistoryScreen({ navigation, route }) {
   const { notificationId, fileName } = route.params || {}
@@ -66,11 +67,12 @@ export default function DefectHistoryScreen({ navigation, route }) {
   if (selectedDefect) {
     return (
       <BackgroundWrapper>
+        <StatusBar style="dark" />
         <SafeAreaView style={globalStyles.safeArea}>
           <View style={[globalStyles.container, styles.containerPadding]}>
             <HeaderHistory 
-              onBack={handleOnBack} // Pass the back handler only in detail view
-              showBackButton={true} // Explicitly show back button
+              onBack={handleOnBack} 
+              showBackButton={true}
               title={selectedDefect.defectClass || 'Defect Details'} 
             />
             <ScrollView style={styles.content}>
@@ -116,18 +118,22 @@ export default function DefectHistoryScreen({ navigation, route }) {
 
   return (
     <BackgroundWrapper>
-      <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
-        <View style={[globalStyles.container]}>
+      <StatusBar style="dark" />
+      <SafeAreaView style={globalStyles.safeArea}>
+        <View style={globalStyles.container}>
           <HeaderHistory 
-            showBackButton={false} // Hide back button in the main list view
+            showBackButton={false}
+            title="Defect History"
           />
-          <FlatList
-            data={defectHistory}
-            renderItem={renderItem}
-            keyExtractor={item => item.$id}
-            contentContainerStyle={globalStyles.listContainer}
-            showsVerticalScrollIndicator={false}
-          />
+          <View style={styles.contentContainer}>
+            <FlatList
+              data={defectHistory}
+              renderItem={renderItem}
+              keyExtractor={item => item.$id}
+              contentContainerStyle={globalStyles.listContainer}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
         </View>
         <ActionButtons navigation={navigation} currentScreen="DefectHistory" />
       </SafeAreaView>
@@ -136,6 +142,11 @@ export default function DefectHistoryScreen({ navigation, route }) {
 }
 
 const styles = {
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+    paddingBottom: 80, // Add padding for bottom navigation
+  },
   containerPadding: {
     padding: 20,
   },
@@ -153,7 +164,7 @@ const styles = {
     borderRadius: borderRadius.m,
     padding: 15,
     ...shadows.light,
-    marginBottom: 70, // Add space at bottom for the navigation
+    marginBottom: 70,
   },
   detailRow: {
     flexDirection: 'row',

@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 15,
+    padding: 10,
     marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: {

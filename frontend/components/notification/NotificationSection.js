@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     height: 260,
     marginHorizontal: 25,
     backgroundColor: 'transparent',
-    padding: 5,
+    padding: 10,
   },
   notificationItem: {
     flexDirection: 'row',

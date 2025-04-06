@@ -1,47 +1,48 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
+import { globalStyles, colors } from '../../styles/globalStyles';
 
-export const HeaderHistory = ({ onBack, title = "Defect History", showBackButton = true }) => {
-  const navigation = useNavigation();
-  const handleBack = onBack || (() => navigation.goBack());
-
+export function HeaderHistory({ onBack, title = 'Defect History', showBackButton = false }) {
   return (
     <View style={styles.header}>
-      {showBackButton && (
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-      )}
-      <View style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>{title}</Text>
+      <View style={styles.headerContent}>
+        {showBackButton && (
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={onBack}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text.dark} />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>{title}</Text>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   header: {
+    paddingVertical: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 25,
+    position: 'relative',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
     position: 'relative',
   },
   backButton: {
-    marginRight: 15,
-    zIndex: 1,
     position: 'absolute',
     left: 0,
+    zIndex: 10,
   },
-  headerTitleContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 29,
-    fontWeight: 'bold',
-    color: '#FFD700',
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: "#FFD700",
+    textAlign: 'center',
+    width: '100%',
   },
 });

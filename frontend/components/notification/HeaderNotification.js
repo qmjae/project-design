@@ -1,38 +1,49 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { globalStyles, colors } from '../../styles/globalStyles';
 
-export const HeaderNotification = ({title = "Notifications"}) => (
-        <SafeAreaView>
-            <View style={styles.header}>
-                <View style={styles.headerTitleContainer}>
-                    <Text style={styles.headerTitle}>{title}</Text>
-                </View>
-            </View>
-        </SafeAreaView>
+export function HeaderNotification({ onBack, title = 'Notifications', showBackButton = false }) {
+  return (
+    <View style={styles.header}>
+      <View style={styles.headerContent}>
+        {showBackButton && (
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={onBack}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text.dark} />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>{title}</Text>
+      </View>
+    </View>
   );
+}
 
 const styles = StyleSheet.create({
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 25,
-      position: 'relative',
-    },
-    backButton: {
-      marginRight: 15,
-      zIndex: 1,
-      position: 'absolute',
-      left: 0,
-    },
-    headerTitleContainer: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    headerTitle: {
-      fontSize: 29,
-      fontWeight: 'bold',
-      color: '#FFD700',
-    },
-  });
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+    marginBottom: 25,
+    paddingVertical: 5,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    zIndex: 10,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color:  "#FFD700",
+    textAlign: 'center',
+    width: '100%',
+  },
+});
