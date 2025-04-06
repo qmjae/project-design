@@ -34,7 +34,20 @@ export default function ActionButtons({ navigation }) {
           <Text style={styles.buttonText}>History</Text>
         </View>
       </TouchableOpacity>
+      <View style={styles.cameraButtonContainer}>
+        <TouchableOpacity 
+          style={styles.cameraButton}
+          onPress={() => navigation.navigate('ThermalCamera')}
+        >
+          <Ionicons 
+            name="camera" 
+            size={32} 
+            color="#fff"
+          />
+        </TouchableOpacity>
+      </View>
     </View>
+    
   );
 }
 
@@ -43,6 +56,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     paddingHorizontal: 25,
+    flexWrap: 'wrap',
   },
   actionButton: {
     flex: 1,
@@ -79,5 +93,26 @@ const styles = StyleSheet.create({
     color: '#76c0df',
     fontWeight: 'bold',
     alignSelf: 'stretch',
+  },
+  cameraButtonContainer: {
+    position: 'absolute',
+    bottom: '-200%',
+    left: '50%',
+  },
+  cameraButton: {
+    backgroundColor: '#76c0df',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+    elevation: 6,
   },
 }); 
