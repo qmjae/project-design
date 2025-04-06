@@ -94,7 +94,7 @@ export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.main,
-    paddingBottom: 65, // Space for bottom navigation
+    paddingBottom: 50, // Space for bottom navigation
   },
   contentContainer: {
     flex: 1,

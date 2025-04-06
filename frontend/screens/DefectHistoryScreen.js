@@ -116,7 +116,7 @@ export default function DefectHistoryScreen({ navigation, route }) {
   return (
     <BackgroundWrapper>
       <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
-        <View style={[globalStyles.container, styles.containerPadding]}>
+        <View style={[globalStyles.container]}>
           <HeaderHistory />
           <FlatList
             data={defectHistory}
@@ -133,9 +133,9 @@ export default function DefectHistoryScreen({ navigation, route }) {
 }
 
 const styles = {
-  containerPadding: {
-    padding: 10,
-  },
+  // containerPadding: {
+  //   padding: 15,
+  // },
   content: {
     flex: 1,
   },

@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 29,
-    fontWeight: '500',
+    fontWeight: 'bold',
     color: '#FFD700',
   },
 });

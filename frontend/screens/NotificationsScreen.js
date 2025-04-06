@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import NotificationSection from '../components/home/NotificationSection';
+import NotificationSection from '../components/notification/NotificationSection';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import ActionButtons from '../components/home/ActionButtons';
 import { globalStyles } from '../styles/globalStyles';
