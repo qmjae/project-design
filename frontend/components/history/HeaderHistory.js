@@ -4,24 +4,21 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export const HeaderHistory = ({ onBack, title = "History" }) => {
+export const HeaderHistory = ({ onBack, title = "Defect History", showBackButton = true }) => {
   const navigation = useNavigation();
   const handleBack = onBack || (() => navigation.goBack());
 
   return (
-    <SafeAreaView>
-      <View style={styles.header}>
-        {/* <TouchableOpacity 
-          onPress={onBack}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={40} color="black" />
-        </TouchableOpacity> */}
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>{title}</Text>
-        </View>
+    <View style={styles.header}>
+      {showBackButton && (
+        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+      )}
+      <View style={styles.headerTitleContainer}>
+        <Text style={styles.headerTitle}>{title}</Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

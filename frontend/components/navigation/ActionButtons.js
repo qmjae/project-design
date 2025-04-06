@@ -57,7 +57,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
           size={24} 
           color={currentScreen === 'Notifications' ? '#76c0df' : '#666'}
         />
-        <Text style={[styles.navText, currentScreen === 'Notifications' && styles.activeNavText]}>Alerts</Text>
+        <Text style={[styles.navText, currentScreen === 'Notifications' && styles.activeNavText]}>Notifications</Text>
       </TouchableOpacity>
     </View>
   );

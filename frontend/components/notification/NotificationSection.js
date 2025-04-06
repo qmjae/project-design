@@ -38,11 +38,7 @@ export default function NotificationsSection({ }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.sectionHeader}>
-        <Ionicons name="notifications" size={40} color="#76c0df" />
-        <Text style={styles.sectionTitle}>Notifications</Text>
-      </View>
+    <View>
       <View style={styles.notificationBox}>
         <ScrollView>
           {notifications.map((notification) => (
@@ -106,21 +102,6 @@ export default function NotificationsSection({ }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 25,
-    marginVertical: 10,
-  },
-  sectionTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginLeft: 10,
-    color: '#FFD700',
-  },
   notificationBox: {
     height: 260,
     marginHorizontal: 25,

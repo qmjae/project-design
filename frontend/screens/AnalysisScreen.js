@@ -151,7 +151,6 @@ export default function AnalysisScreen({ navigation }) {
 
   return (
     <BackgroundWrapper>
-      <StatusBar style="dark" />
       <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
       <View style={styles.contentContainer}>
         <HeaderAnalysis />

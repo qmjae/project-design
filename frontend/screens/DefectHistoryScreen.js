@@ -69,7 +69,8 @@ export default function DefectHistoryScreen({ navigation, route }) {
         <SafeAreaView style={globalStyles.safeArea}>
           <View style={[globalStyles.container, styles.containerPadding]}>
             <HeaderHistory 
-              onBack={handleOnBack}
+              onBack={handleOnBack} // Pass the back handler only in detail view
+              showBackButton={true} // Explicitly show back button
               title={selectedDefect.defectClass || 'Defect Details'} 
             />
             <ScrollView style={styles.content}>
@@ -117,7 +118,9 @@ export default function DefectHistoryScreen({ navigation, route }) {
     <BackgroundWrapper>
       <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
         <View style={[globalStyles.container]}>
-          <HeaderHistory />
+          <HeaderHistory 
+            showBackButton={false} // Hide back button in the main list view
+          />
           <FlatList
             data={defectHistory}
             renderItem={renderItem}
@@ -133,9 +136,9 @@ export default function DefectHistoryScreen({ navigation, route }) {
 }
 
 const styles = {
-  // containerPadding: {
-  //   padding: 15,
-  // },
+  containerPadding: {
+    padding: 20,
+  },
   content: {
     flex: 1,
   },
@@ -150,6 +153,7 @@ const styles = {
     borderRadius: borderRadius.m,
     padding: 15,
     ...shadows.light,
+    marginBottom: 70, // Add space at bottom for the navigation
   },
   detailRow: {
     flexDirection: 'row',
