@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
@@ -7,18 +7,18 @@ import Header from '../components/home/Header';
 import WelcomeSection from '../components/home/WelcomeSection';
 import ActionButtons from '../components/home/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
-// We'll move the NotificationSection to its own screen
+import { globalStyles } from '../styles/globalStyles';
 
 export default function HomeScreen({ navigation }) {
   return (
     <BackgroundWrapper>
       <StatusBar style="dark" />
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.container}>
+      <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
+        <View style={globalStyles.container}>
           <Header />
           <WelcomeSection />
           {/* Here you would add your dashboard/analytics content */}
-          <View style={styles.dashboardContainer}>
+          <View style={globalStyles.contentContainer}>
             {/* Dashboard content will go here */}
           </View>
         </View>
@@ -27,21 +27,3 @@ export default function HomeScreen({ navigation }) {
     </BackgroundWrapper>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    paddingBottom: 65, // Add space for bottom navigation
-  },
-  dashboardContainer: {
-    flex: 1,
-    padding: 20,
-    // Add styling for your dashboard content
-  },
-});

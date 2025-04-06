@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, SafeAreaView, Image, Text, ScrollView } from 'react-native';
+import { View, FlatList, SafeAreaView, Image, Text, ScrollView } from 'react-native';
 import { HeaderHistory } from '../components/history/HeaderHistory';
 import { HistoryCard } from '../components/history/HistoryCard';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
-import { getDefectHistory, databases } from '../../backend/lib/appwrite';
+import { getDefectHistory } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
+import ActionButtons from '../components/home/ActionButtons';
+import { globalStyles, colors, borderRadius, shadows } from '../styles/globalStyles';
 
 export default function DefectHistoryScreen({ navigation, route }) {
   const { notificationId, fileName } = route.params || {}
@@ -64,45 +66,48 @@ export default function DefectHistoryScreen({ navigation, route }) {
   if (selectedDefect) {
     return (
       <BackgroundWrapper>
-        <SafeAreaView style={styles.container}>
-          <HeaderHistory 
-            onBack={handleOnBack}
-            title={selectedDefect.defectClass || 'Defect Details'} 
-          />
-          <ScrollView style={styles.content}>
-            {selectedDefect.imageUrl && (
-              <Image
-                source={{ uri: selectedDefect.imageUrl }}
-                style={styles.image}
-                resizeMode="contain"
-              />
-            )}
-            <View style={styles.detailsContainer}>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Defect Type:</Text>
-                <Text style={styles.value}>{selectedDefect.defectClass || 'Unknown'}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Severity:</Text>
-                <Text style={[
-                  styles.value, 
-                  styles.priority,
-                ]}>
-                  {selectedDefect.priority || 'N/A'}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Date:</Text>
-                <Text style={styles.value}>{formatDate(selectedDefect.DateTime)}</Text>
-              </View>
-              {selectedDefect.description && (
-                <View style={styles.descriptionContainer}>
-                  <Text style={styles.label}>Description:</Text>
-                  <Text style={styles.description}>{selectedDefect.description}</Text>
-                </View>
+        <SafeAreaView style={globalStyles.safeArea}>
+          <View style={[globalStyles.container, styles.containerPadding]}>
+            <HeaderHistory 
+              onBack={handleOnBack}
+              title={selectedDefect.defectClass || 'Defect Details'} 
+            />
+            <ScrollView style={styles.content}>
+              {selectedDefect.imageUrl && (
+                <Image
+                  source={{ uri: selectedDefect.imageUrl }}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
               )}
-            </View>
-          </ScrollView>
+              <View style={styles.detailsContainer}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Defect Type:</Text>
+                  <Text style={styles.value}>{selectedDefect.defectClass || 'Unknown'}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Severity:</Text>
+                  <Text style={[
+                    styles.value, 
+                    styles.priority,
+                  ]}>
+                    {selectedDefect.priority || 'N/A'}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Date:</Text>
+                  <Text style={styles.value}>{formatDate(selectedDefect.DateTime)}</Text>
+                </View>
+                {selectedDefect.description && (
+                  <View style={styles.descriptionContainer}>
+                    <Text style={styles.label}>Description:</Text>
+                    <Text style={styles.description}>{selectedDefect.description}</Text>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+          <ActionButtons navigation={navigation} currentScreen="DefectHistory" />
         </SafeAreaView>
       </BackgroundWrapper>
     );
@@ -110,31 +115,26 @@ export default function DefectHistoryScreen({ navigation, route }) {
 
   return (
     <BackgroundWrapper>
-      <SafeAreaView style={styles.container}>
-        <HeaderHistory 
-          onBack={() => navigation.navigate('Home')}
-          title="History"
-        />
-        <FlatList
-          data={defectHistory}
-          renderItem={renderItem}
-          keyExtractor={item => item.$id}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-        />
+      <SafeAreaView style={globalStyles.safeArea}>
+        <View style={[globalStyles.container, styles.containerPadding]}>
+          <HeaderHistory />
+          <FlatList
+            data={defectHistory}
+            renderItem={renderItem}
+            keyExtractor={item => item.$id}
+            contentContainerStyle={globalStyles.listContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+        <ActionButtons navigation={navigation} currentScreen="DefectHistory" />
       </SafeAreaView>
     </BackgroundWrapper>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
+const styles = {
+  containerPadding: {
     padding: 20,
-  },
-  listContainer: {
-    paddingBottom: 20,
   },
   content: {
     flex: 1,
@@ -142,21 +142,15 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 300,
-    borderRadius: 12,
+    borderRadius: borderRadius.m,
     marginBottom: 20,
   },
   detailsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
+    backgroundColor: colors.background.white,
+    borderRadius: borderRadius.m,
     padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    ...shadows.light,
+    marginBottom: 70, // Add space at the bottom for the navigation
   },
   detailRow: {
     flexDirection: 'row',
@@ -164,16 +158,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.background.lightGray,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text.dark,
   },
   value: {
     fontSize: 16,
-    color: '#666',
+    color: colors.text.medium,
   },
   priority: {
     fontWeight: 'bold',
@@ -183,8 +177,8 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: colors.text.medium,
     marginTop: 5,
     lineHeight: 24,
   },
-});
+};

@@ -11,12 +11,12 @@ export const HeaderHistory = ({ onBack, title = "History" }) => {
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity 
+        {/* <TouchableOpacity 
           onPress={onBack}
           style={styles.backButton}
         >
           <Ionicons name="arrow-back" size={40} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>{title}</Text>
         </View>

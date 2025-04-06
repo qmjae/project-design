@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
+import { SafeAreaView, TouchableOpacity, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { StatusBar } from 'expo-status-bar';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
+import ActionButtons from '../components/home/ActionButtons';
+import { globalStyles, colors, shadows } from '../styles/globalStyles';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -156,8 +159,9 @@ export default function AnalysisScreen({ navigation }) {
 
   return (
     <BackgroundWrapper>
-      <SafeAreaView style={styles.container}>
-        <HeaderAnalysis onBack={handleBack} />
+      <StatusBar style="dark" />
+      <SafeAreaView style={globalStyles.safeArea}>
+        <HeaderAnalysis />
         <ImportSection onPress={pickImage} />
         <FilesList 
           files={uploadedFiles}
@@ -175,32 +179,21 @@ export default function AnalysisScreen({ navigation }) {
             {isAnalyzing ? 'Analyzing...' : 'Results'}
           </Text>
         </TouchableOpacity>
+        <ActionButtons navigation={navigation} currentScreen="Analysis" />
       </SafeAreaView>
     </BackgroundWrapper>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    padding: 20,
-  },
+const styles = {
   resultsButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#76c0df',
+    backgroundColor: colors.primary,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadows.light,
   },
   resultsButtonText: {
     color: '#fff',
@@ -210,4 +203,4 @@ const styles = StyleSheet.create({
   resultsButtonDisabled: {
     backgroundColor: '#D3D3D3',
   },
-}); 
+};
