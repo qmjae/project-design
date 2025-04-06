@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Alert, Dimensions } from 'react-native';
+import { View, Alert, Dimensions } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderResults } from '../components/results/HeaderResults';
@@ -7,6 +7,9 @@ import { ResultCard } from '../components/results/ResultCard';
 import { PaginationDots } from '../components/results/PaginationDots';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import ActionButtons from '../components/home/ActionButtons';
+import { globalStyles } from '../styles/globalStyles';
 
 const PAGE_WIDTH = Dimensions.get('window').width;
 const PAGE_PADDING = 16;
@@ -42,49 +45,49 @@ export default function ResultsScreen({ route }) {
 
   return (
     <BackgroundWrapper>
-      <View style={styles.container}>
-      <View style={styles.cardsContainer}>
-        <HeaderResults onBack={handleBack} />
-          <Carousel
-            loop={false}
-            width={PAGE_WIDTH}
-            data={analysisResults}
-            onSnapToItem={(index) => setCurrentIndex(index)}
-            renderItem={({ item }) => (
-              <View style={styles.cardWrapper}>
-                <ResultCard
-                  item={item}
-                  width={PAGE_WIDTH - (PAGE_PADDING * 2)}
-                  notificationId={notificationId}
-                />
-              </View>
-            )}
-            style={{ width: PAGE_WIDTH }}
-            defaultIndex={0}
-            enabled={true}
-            snapEnabled={true}
-            panGestureHandlerProps={{
-              activeOffsetX: [-10, 10],
-            }}
+      <SafeAreaView style={globalStyles.safeArea}>
+        <View style={globalStyles.container}>
+          <View style={styles.cardsContainer}>
+            <HeaderResults onBack={handleBack} />
+            <Carousel
+              loop={false}
+              width={PAGE_WIDTH}
+              data={analysisResults}
+              onSnapToItem={(index) => setCurrentIndex(index)}
+              renderItem={({ item }) => (
+                <View style={styles.cardWrapper}>
+                  <ResultCard
+                    item={item}
+                    width={PAGE_WIDTH - (PAGE_PADDING * 2)}
+                    notificationId={notificationId}
+                  />
+                </View>
+              )}
+              style={{ width: PAGE_WIDTH }}
+              defaultIndex={0}
+              enabled={true}
+              snapEnabled={true}
+              panGestureHandlerProps={{
+                activeOffsetX: [-10, 10],
+              }}
+            />
+          </View>
+          <PaginationDots
+            totalDots={analysisResults.length}
+            activeIndex={currentIndex}
           />
         </View>
-        <PaginationDots
-          totalDots={analysisResults.length}
-          activeIndex={currentIndex}
-        />
-      </View>
+        <ActionButtons navigation={navigation} currentScreen="Analysis" />
+      </SafeAreaView>
     </BackgroundWrapper>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
+const styles = {
   cardsContainer: {
     flex: 1,
     position: 'relative',
+    paddingBottom: 10, // Add space for pagination dots
   },
   cardWrapper: {
     padding: PAGE_PADDING,
@@ -92,4 +95,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+};

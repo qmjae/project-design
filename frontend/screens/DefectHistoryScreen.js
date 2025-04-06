@@ -115,7 +115,7 @@ export default function DefectHistoryScreen({ navigation, route }) {
 
   return (
     <BackgroundWrapper>
-      <SafeAreaView style={globalStyles.safeArea}>
+      <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
         <View style={[globalStyles.container, styles.containerPadding]}>
           <HeaderHistory />
           <FlatList
