@@ -11,7 +11,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
       >
         <Ionicons 
           name="home" 
-          size={24} 
+          size={34} 
           color={currentScreen === 'Home' ? '#76c0df' : '#666'}
         />
         <Text style={[styles.navText, currentScreen === 'Home' && styles.activeNavText]}>Home</Text>
@@ -23,7 +23,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
       >
         <Ionicons 
           name="add-circle" 
-          size={24} 
+          size={34} 
           color={currentScreen === 'Analysis' ? '#76c0df' : '#666'}
         />
         <Text style={[styles.navText, currentScreen === 'Analysis' && styles.activeNavText]}>Analysis</Text>
@@ -33,7 +33,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
         style={styles.cameraButton}
         onPress={() => navigation.navigate('ThermalCamera')}
       >
-        <Ionicons name="camera" size={28} color="#fff" />
+        <Ionicons name="camera" size={36} color="#fff" />
       </TouchableOpacity>
       
       <TouchableOpacity 
@@ -42,7 +42,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
       >
         <Ionicons 
           name="archive" 
-          size={24} 
+          size={34} 
           color={currentScreen === 'DefectHistory' ? '#76c0df' : '#666'}
         />
         <Text style={[styles.navText, currentScreen === 'DefectHistory' && styles.activeNavText]}>History</Text>
@@ -54,7 +54,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
       >
         <Ionicons 
           name="notifications" 
-          size={24} 
+          size={34} 
           color={currentScreen === 'Notifications' ? '#76c0df' : '#666'}
         />
         <Text style={[styles.navText, currentScreen === 'Notifications' && styles.activeNavText]}>Notifications</Text>
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
-    height: 65,
-    paddingBottom: 8,
+    height: 85,
+    paddingBottom: 12,
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 10,
@@ -88,16 +88,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+    paddingVertical: 8,
   },
   activeNavItem: {
-    borderTopWidth: 3,
+    borderTopWidth: 4,
     borderTopColor: '#76c0df',
-    paddingTop: 3,
+    paddingTop: 4,
   },
   navText: {
-    fontSize: 12,
-    marginTop: 3,
+    fontSize: 14,
+    marginTop: 5,
     color: '#666',
+    fontWeight: 'bold',
   },
   activeNavText: {
     color: '#76c0df',
@@ -105,18 +107,18 @@ const styles = StyleSheet.create({
   },
   cameraButton: {
     backgroundColor: '#76c0df',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 70,
+    height: 70,
+    borderRadius: 355,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    borderWidth: 3,
+    borderWidth: 4,
     borderColor: '#fff',
   },
 });
