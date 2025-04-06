@@ -42,22 +42,30 @@ export default function NotificationsSection() {
           const historyItems = await getDefectHistory(user.$id);
           
           // Process history items to match notification format
-          const historyNotifications = historyItems.map(item => ({
-            id: item.$id,
-            type: item.status === 'resolved' ? 'Resolved' : 'Detected',
-            name: item.fileName,
-            priority: item.priority,
-            datetime: formatDate(item.DateTime),
-            status: item.status,
-            file: [{
+          const historyNotifications = historyItems.map(item => {
+            // Create a valid file array with proper structure
+            const fileObject = {
               fileName: item.fileName,
               imageUrl: item.imageUrl,
               detections: [{
                 class: item.defectClass,
-                priority: item.priority
+                priority: item.priority,
+                // Add other fields that might be expected
+                description: item.description || ''
               }]
-            }]
-          }));
+            };
+            
+            return {
+              id: item.$id,
+              type: item.status === 'resolved' ? 'Resolved' : 'Detected',
+              name: item.fileName,
+              priority: item.priority,
+              datetime: formatDate(item.DateTime),
+              status: item.status,
+              // Always make file an array, even if it's just one item
+              file: [fileObject]
+            };
+          });
           
           // Combine with local notifications, filtering out duplicates
           const localNotifIds = new Set(notifications.map(n => n.id));
@@ -79,11 +87,32 @@ export default function NotificationsSection() {
     fetchAllNotifications();
   }, [notifications, user]);
 
+
+  // Update the handleNotification function
+
   const handleNotification = (notification) => {
+    // Ensure we have a valid file array before navigating
+    const fileData = notification.file || [];
+    
+    console.log("Handling notification click:", {
+      id: notification.id,
+      type: notification.type,
+      fileData: fileData
+    });
+    
+    // Always pass the notification ID (which should be a valid database ID)
     if (notification.type !== 'Resolved') {
+      // For each fileData item, attach the notification ID so ResultCard can access it
+      const fileDataWithIds = Array.isArray(fileData) ? 
+        fileData.map(file => ({
+          ...file,
+          databaseId: notification.id // Ensure the database ID is passed along
+        })) : 
+        [{...fileData, databaseId: notification.id}];
+      
       navigation.navigate('Results', {
         notificationId: notification.id,
-        analysisResults: notification.file,
+        analysisResults: fileDataWithIds,
       });
     } else {
       navigation.navigate('DefectHistory', {

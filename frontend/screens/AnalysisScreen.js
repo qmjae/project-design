@@ -9,12 +9,13 @@ import { FilesList } from '../components/analysis/FilesList';
 import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import ActionButtons from '../components/navigation/ActionButtons';
+import { saveDefectResult } from '../../backend/lib/appwrite';
 import { globalStyles, colors, shadows } from '../styles/globalStyles';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const { setAnalysisResults, addNotification } = useGlobalContext();
+  const { setAnalysisResults, addNotification, user } = useGlobalContext();
 
   const formatDateTime = (date) => {
     const year = date.getFullYear();
@@ -65,6 +66,8 @@ export default function AnalysisScreen({ navigation }) {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
   };
+
+  // Update the handleResults function
 
   const handleResults = async () => {
     if (uploadedFiles.length === 0) {
@@ -120,18 +123,39 @@ export default function AnalysisScreen({ navigation }) {
 
       console.log('Final analysis results:', analysisResults);
 
-      analysisResults.forEach((file) => {
-        if (file.detections && file.detections.length > 0) {
-          addNotification({
-            id: file.uploadId,
-            type: 'Detected',
-            priority: file.detections[0].priority.match(/^(\d+)/)?.[0],
-            datetime: formatDateTime(new Date()),
-            name: file.fileName,
-            file: [file],
-          });
-        }
-      });
+      // Save defect results to database BEFORE adding to notifications
+      const savedNotifications = await Promise.all(
+        analysisResults.map(async (result) => {
+          if (result.detections && result.detections.length > 0) {
+            try {
+              // Save to database first to get a valid document ID
+              const savedDocument = await saveDefectResult(user.$id, result);
+              console.log('Saved defect to database:', savedDocument);
+              
+              // Return notification with valid database ID
+              return {
+                id: savedDocument.$id, // Use the actual database ID!
+                type: 'Detected',
+                priority: result.detections[0].priority.match(/^(\d+)/)?.[0],
+                datetime: formatDateTime(new Date()),
+                name: result.fileName,
+                file: [result],
+              };
+            } catch (err) {
+              console.error('Error saving defect:', err);
+              return null;
+            }
+          }
+          return null;
+        })
+      );
+      
+      // Filter out nulls and add to notifications
+      savedNotifications
+        .filter(notification => notification !== null)
+        .forEach(notification => {
+          addNotification(notification);
+        });
 
       navigation.navigate('Results', { 
         files: uploadedFiles,

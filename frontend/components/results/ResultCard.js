@@ -11,46 +11,87 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 export const ResultCard = memo(({ item, width, notificationId }) => {
   const navigation = useNavigation();
-  const { user, updateNotificationType } = useGlobalContext();
+  const { user, updateNotificationType, addNotification } = useGlobalContext();
   const [isResolving, setIsResolving] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [savedDocumentId, setSavedDocumentId] = useState(null);
 
+  // Add console logging to help debug
+  console.log("ResultCard received:", { item, notificationId });
+  
+  // Verify that item has expected properties
+  const hasValidData = item && 
+    (item.detections || item.imageUri || (item.file && item.file.length > 0));
+  
+  if (!hasValidData) {
+    console.error("ResultCard received invalid data:", item);
+    return (
+      <View style={[styles.resultCard, { width }]}>
+        <Text style={styles.errorText}>Invalid defect data</Text>
+      </View>
+    );
+  }
+
+  // Completely redesigned handleResolve function with proper logic
   const handleResolve = async () => {
     setIsResolving(true);
     try {
-      // Log what we're working with
-      console.log('Resolving item:', item);
-      console.log('Initial notificationId:', notificationId);
+      console.log('Starting resolve process with data:', { notificationId, itemId: item.$id });
       
-      // Choose which ID to update based on what's available
-      let idToUpdate = notificationId;
-      
-      // If we don't have a notification ID, create a new document and use its ID
-      if (!idToUpdate) {
-        console.log('No notification ID provided, saving as new defect result');
-        const savedResult = await saveDefectResult(user.$id, item);
-        console.log('Saved new defect with ID:', savedResult.$id);
-        
-        // Use the newly created document's ID
-        idToUpdate = savedResult.$id;
-        setSavedDocumentId(idToUpdate);
-      } else {
-        // If we already have a notification ID, just update its status
-        console.log('Updating existing notification:', idToUpdate);
-      }
-      
-      // Now update the status with the appropriate ID
-      if (idToUpdate) {
-        await updateNotificationType(idToUpdate, "Resolved");
-        console.log('Status updated successfully');
+      // CASE 1: We already have a notification ID (coming from notifications screen)
+      if (notificationId) {
+        console.log('Using existing notification ID:', notificationId);
+        await updateNotificationType(notificationId, "Resolved");
         setIsResolved(true);
-      } else {
-        throw new Error('Failed to get a valid document ID for update');
+        return;
       }
+      
+      // CASE 2: No notification ID but item might be from database (has databaseId)
+      if (item.databaseId) {
+        console.log('Using item.databaseId:', item.databaseId);
+        await updateNotificationType(item.databaseId, "Resolved");
+        setIsResolved(true);
+        return;
+      }
+      
+      // CASE 3: Fresh analysis result that needs to be saved to database first
+      console.log('No existing ID found, saving new defect to database');
+      
+      // Check if user exists before proceeding
+      if (!user || !user.$id) {
+        console.error('Cannot save defect: User not authenticated');
+        Alert.alert('Error', 'You need to be logged in to resolve defects');
+        return;
+      }
+      
+      // Save the defect to the database
+      const savedDocument = await saveDefectResult(user.$id, item);
+      console.log('Saved new defect with ID:', savedDocument.$id);
+      
+      // Update the status to resolved
+      await updateNotificationType(savedDocument.$id, "Resolved");
+      
+      // Store the document ID for future reference
+      setSavedDocumentId(savedDocument.$id);
+      
+      // Create a notification for this resolved defect
+      const newNotification = {
+        id: savedDocument.$id,
+        type: 'Resolved', // Already resolved
+        priority: item.detections[0]?.priority || 'N/A',
+        datetime: new Date().toISOString(),
+        name: item.fileName || 'Unnamed defect',
+        file: [item],
+      };
+      
+      // Add to notifications
+      addNotification(newNotification);
+      
+      setIsResolved(true);
+      
     } catch (error) {
       console.error('Error in handleResolve:', error);
-      Alert.alert('Error', 'Failed to resolve defect');
+      Alert.alert('Error', 'Failed to resolve defect: ' + (error.message || 'Unknown error'));
     } finally {
       setIsResolving(false);
     }
@@ -125,8 +166,6 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
   );
 });
 
-// Rest of your styles remain the same...
-
 const styles = StyleSheet.create({
   resultCard: {
     backgroundColor: '#FFF',
@@ -152,6 +191,12 @@ const styles = StyleSheet.create({
   detailsContainer: {
     flex: 1,
     marginBottom: 0,
+  },
+  errorText: {
+    color: 'red',
+    padding: 20,
+    textAlign: 'center',
+    fontSize: 16,
   },
   buttonContainer: {
     position: 'absolute',
@@ -195,4 +240,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 5,
   },
-}); 
+});
