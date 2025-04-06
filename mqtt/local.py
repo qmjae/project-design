@@ -1,6 +1,6 @@
 import paho.mqtt.publish as publish
 
-mqtt_broker_address = "192.168.1.12"  # Replace with your MQTT broker address
+mqtt_broker_address = "192.168.1.18"  # Replace with your MQTT broker address
 mqtt_chanel = "adlaw"
 
 message = "Hello Adlaw, this is a test message!"
