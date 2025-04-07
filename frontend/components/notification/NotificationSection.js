@@ -160,7 +160,7 @@ export default function NotificationsSection() {
                       <Stop
                         offset="0%"
                         stopColor={getNotificationType(notification.type, notification.status)[0]}
-                        stopOpacity="0.75"
+                        stopOpacity="1"
                       />
                       <Stop
                         offset="75%"

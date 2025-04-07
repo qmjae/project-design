@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 15,
+    padding: 20,
     borderRadius: 8,
     borderColor: '#F0EFE7',
     borderWidth: 1,
