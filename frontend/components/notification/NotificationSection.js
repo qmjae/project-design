@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
 import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { getDefectHistory } from '../../../backend/lib/appwrite';
-import { responsive } from '../../utils/responsive';
 
 const getNotificationType = (type, status) => {
   // Check both type and status since data can come from different sources
@@ -215,19 +214,19 @@ export default function NotificationsSection() {
 
 const styles = StyleSheet.create({
   notificationBox: {
-    minHeight: responsive.h(260),
-    maxHeight: responsive.h(610),
-    marginHorizontal: responsive.w(25),
-    marginTop: responsive.h(20),
+    minHeight: 260,
+    maxHeight: 610,
+    marginHorizontal: 25,
+    marginTop: 20,
     backgroundColor: 'transparent',
-    padding: responsive.w(10),
+    padding: 10,
   },
   notificationItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: borderRadius.m,
-    marginBottom: responsive.h(12),
+    borderRadius: 10,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -239,11 +238,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   notificationContent: {
-    padding: responsive.m(15),
+    padding: 15,
     flex: 1,
   },
   notificationTitle: {
-    fontSize: responsive.font(18),
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
   },

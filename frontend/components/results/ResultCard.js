@@ -7,7 +7,6 @@ import { Section } from './Section';
 import { useNavigation } from '@react-navigation/native';
 import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { saveDefectResult } from '../../../backend/lib/appwrite';
-import { responsive } from '../../utils/responsive';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export const ResultCard = memo(({ item, width, notificationId }) => {
@@ -172,8 +171,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderWidth: 2,
     borderColor: '#F0F0F0',
-    borderRadius: responsive.w(15),
-    padding: responsive.m(12),
+    borderRadius: 15,
+    padding: 12,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -186,7 +185,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   scrollContent: {
-    paddingBottom: responsive.h(30),
+    paddingBottom: 30,
     width: '100%',
   },
   detailsContainer: {
