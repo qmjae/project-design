@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: "5%",
+    height: "10%",
   },
   logoContainer: {
     position: 'absolute',

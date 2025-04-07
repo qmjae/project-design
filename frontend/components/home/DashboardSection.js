@@ -243,8 +243,8 @@ export default function DashboardSection() {
 
 const styles = StyleSheet.create({
   dashboardContainer: {
-    padding: responsive.w(15),
-    paddingBottom: responsive.h(50), // Add extra padding at bottom for navigation bar
+    padding: 15,
+    paddingBottom: 95, // Add extra padding at bottom for navigation bar
   },
   loadingContainer: {
     justifyContent: 'center',
