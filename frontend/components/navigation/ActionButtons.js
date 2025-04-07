@@ -31,7 +31,7 @@ export default function ActionButtons({ navigation, currentScreen = 'Home' }) {
 
       <TouchableOpacity 
         style={styles.cameraButton}
-        onPress={() => navigation.navigate('ThermalCamera')}
+        onPress={() => navigation.navigate('Camera')}
       >
         <Ionicons name="camera" size={36} color="#fff" />
       </TouchableOpacity>
