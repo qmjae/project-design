@@ -1,4 +1,5 @@
 import { StyleSheet, Platform, StatusBar, Dimensions } from 'react-native';
+import { responsive } from '../utils/responsive'; // Importing responsive utility functions
 
 const { width, height } = Dimensions.get('window');
 
@@ -24,30 +25,30 @@ export const colors = {
 };
 
 export const spacing = {
-  xs: 5,
-  s: 8,
-  m: 15,
-  l: 20,
-  xl: 25,
-  xxl: 35,
+  xs: responsive.w(5),
+  s: responsive.w(8),
+  m: responsive.w(15),
+  l: responsive.w(20),
+  xl: responsive.w(25),
+  xxl: responsive.w(35),
 };
 
 export const fontSizes = {
-  xs: 12,
-  s: 14,
-  m: 16,
-  l: 18,
-  xl: 20,
-  xxl: 24,
-  xxxl: 30,
-  title: 48,
+  xs: responsive.font(12),
+  s: responsive.font(14),
+  m: responsive.font(16),
+  l: responsive.font(18),
+  xl: responsive.font(20),
+  xxl: responsive.font(24),
+  xxxl: responsive.font(30),
+  title: responsive.font(48),
 };
 
 export const borderRadius = {
-  s: 5,
-  m: 8,
-  l: 10,
-  xl: 15,
+  s: responsive.w(5),
+  m: responsive.w(8),
+  l: responsive.w(10),
+  xl: responsive.w(15),
   circle: 9999,
 };
 
@@ -94,7 +95,7 @@ export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.main,
-    paddingBottom: 50, // Space for bottom navigation
+    paddingBottom: responsive.h(50), // Space for bottom navigation
   },
   contentContainer: {
     flex: 1,

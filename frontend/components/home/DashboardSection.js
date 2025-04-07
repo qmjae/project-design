@@ -6,8 +6,9 @@ import { PieChart } from 'react-native-chart-kit';
 import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { getDefectHistory } from '../../../backend/lib/appwrite';
 import { colors, shadows, borderRadius } from '../../styles/globalStyles';
+import { responsive } from '../../utils/responsive'; // Adjust the path as necessary
 
-const screenWidth = Dimensions.get('window').width - 40;
+const screenWidth = responsive.screenWidth - responsive.w(40);
 
 export default function DashboardSection() {
   const navigation = useNavigation();
@@ -209,7 +210,7 @@ export default function DashboardSection() {
         <PieChart
           data={statsData.pieData}
           width={screenWidth}
-          height={200}
+          height={responsive.h(200)}
           chartConfig={{
             backgroundGradientFrom: "#ffffff",
             backgroundGradientFromOpacity: 0,
@@ -242,8 +243,8 @@ export default function DashboardSection() {
 
 const styles = StyleSheet.create({
   dashboardContainer: {
-    padding: 15,
-    paddingBottom: 50, // Add extra padding at bottom for navigation bar
+    padding: responsive.w(15),
+    paddingBottom: responsive.h(50), // Add extra padding at bottom for navigation bar
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -258,12 +259,12 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: responsive.h(20),
   },
   statCard: {
     backgroundColor: colors.background.white,
     borderRadius: borderRadius.m,
-    padding: 15,
+    padding: responsive.m(15),
     alignItems: 'center',
     width: '31%',
     ...shadows.strong,
