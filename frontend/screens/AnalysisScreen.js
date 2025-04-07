@@ -1,56 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, TouchableOpacity, Text, Alert, View } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView, TouchableOpacity, Text, Alert, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { StatusBar } from 'expo-status-bar';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
-import { uploadFilesToAppwrite, saveDefectResult } from '../../backend/lib/appwrite';
+import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import ActionButtons from '../components/navigation/ActionButtons';
+import { saveDefectResult } from '../../backend/lib/appwrite';
 import { globalStyles, colors, shadows } from '../styles/globalStyles';
-import Constants from 'expo-constants';
-import NetInfo from '@react-native-community/netinfo';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const { addNotification, user } = useGlobalContext();
-  const [apiUrl, setApiUrl] = useState('https://yeti-fleet-distinctly.ngrok-free.app/detect/');
-  const [isProduction, setIsProduction] = useState(false);
-
-  // Set up environment detection on component mount
-  useEffect(() => {
-    const checkEnv = async () => {
-      try {
-        // Determine if we're in production based on Expo release channel
-        const environment = Constants.expoConfig?.releaseChannel;
-        const isProd = environment === 'production' || environment === 'prod';
-        setIsProduction(isProd);
-        
-        // Log the environment for debugging
-        console.log(`App environment: ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'}`);
-        
-        // Check connectivity to our API
-        const networkState = await NetInfo.fetch();
-        console.log(`Network state: ${networkState.isConnected ? 'Connected' : 'Disconnected'}`);
-      } catch (error) {
-        console.log('Error checking environment:', error);
-      }
-    };
-    
-    checkEnv();
-  }, []);
+  const { setAnalysisResults, addNotification, user } = useGlobalContext();
 
   const formatDateTime = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+
     let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
+
     hours = hours % 12;
     hours = hours ? String(hours).padStart(2, '0') : '12';
+
     return `${month}-${day}-${year} ${hours}:${minutes} ${ampm}`;
   };
 
@@ -88,7 +67,8 @@ export default function AnalysisScreen({ navigation }) {
     setUploadedFiles(newFiles);
   };
 
-  // Specially modified handleResults function that prioritizes the API call working
+  // Update the handleResults function
+
   const handleResults = async () => {
     if (uploadedFiles.length === 0) {
       Alert.alert(
@@ -101,12 +81,11 @@ export default function AnalysisScreen({ navigation }) {
 
     setIsAnalyzing(true);
     try {
-      // Upload files to Appwrite first
+      // First, upload files to Appwrite
       const uploadedFilesData = await uploadFilesToAppwrite(uploadedFiles);
       console.log('Analysis Screen Uploaded Files Data:', uploadedFilesData);
 
       // Then process each file for defect detection
-      // This is the critical part that might be failing in production
       const analysisResults = await Promise.all(
         uploadedFiles.map(async (file, index) => {
           const formData = new FormData();
@@ -116,111 +95,75 @@ export default function AnalysisScreen({ navigation }) {
             name: file.name
           });
 
-          console.log(`Making API request to: ${apiUrl}`);
-          
-          try {
-            // Add timeout to prevent hanging requests
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000);
-            
-            const response = await fetch(apiUrl, {
-              method: 'POST',
-              body: formData,
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'multipart/form-data',
-              },
-              signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
+          const response = await fetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'multipart/form-data',
+            },
+          });
 
-            if (!response.ok) {
-              const errorText = await response.text();
-              console.error(`API Error (${response.status}):`, errorText);
-              throw new Error(`Analysis failed for ${file.name}: ${response.status} ${errorText || ''}`);
-            }
-
-            const result = await response.json();
-            
-            return {
-              ...uploadedFilesData[index],
-              fileName: file.name,
-              imageUri: file.imageUri,
-              detections: result.detections,
-              uploadId: uploadedFilesData[index].$id
-            };
-          } catch (fetchError) {
-            // If the main API fails, we could handle a fallback here
-            console.error(`Fetch error:`, fetchError);
-            
-            if (fetchError.message.includes('Network request failed') || 
-                fetchError.name === 'AbortError') {
-              // Return a placeholder result to prevent the whole analysis from failing
-              return {
-                ...uploadedFilesData[index],
-                fileName: file.name,
-                imageUri: file.imageUri,
-                detections: [{
-                  class: 'Network Error',
-                  probability: 0,
-                  priority: 'Unknown',
-                  description: 'Could not connect to analysis server. Try again later.',
-                  recommendations: ['Check your internet connection', 'Retry the analysis']
-                }],
-                uploadId: uploadedFilesData[index].$id,
-                isError: true
-              };
-            } else {
-              throw fetchError; // Re-throw other errors
-            }
+          if (!response.ok) {
+            throw new Error(`Analysis failed for ${file.name}`);
           }
+
+          const result = await response.json();
+          
+          // Combine Appwrite data with detection results
+          return {
+            ...uploadedFilesData[index], // Appwrite file data
+            fileName: file.name,
+            imageUri: file.imageUri,
+            detections: result.detections,
+            uploadId: uploadedFilesData[index].$id // Appwrite file ID
+          };
         })
       );
 
       console.log('Final analysis results:', analysisResults);
 
-      // Navigate to results immediately (this is what worked before!)
+      // Save defect results to database BEFORE adding to notifications
+      const savedNotifications = await Promise.all(
+        analysisResults.map(async (result) => {
+          if (result.detections && result.detections.length > 0) {
+            try {
+              // Save to database first to get a valid document ID
+              const savedDocument = await saveDefectResult(user.$id, result);
+              console.log('Saved defect to database:', savedDocument);
+              
+              // Return notification with valid database ID
+              return {
+                id: savedDocument.$id, // Use the actual database ID!
+                type: 'Detected',
+                priority: result.detections[0].priority.match(/^(\d+)/)?.[0],
+                datetime: formatDateTime(new Date()),
+                name: result.fileName,
+                file: [result],
+              };
+            } catch (err) {
+              console.error('Error saving defect:', err);
+              return null;
+            }
+          }
+          return null;
+        })
+      );
+      
+      // Filter out nulls and add to notifications
+      savedNotifications
+        .filter(notification => notification !== null)
+        .forEach(notification => {
+          addNotification(notification);
+        });
+
       navigation.navigate('Results', { 
         files: uploadedFiles,
         analysisResults: analysisResults 
       });
 
-      // AFTER navigation - try to save to database in the background
-      // This way, if it fails, the user still sees results
-      if (user && user.$id) {
-        setTimeout(() => {
-          try {
-            analysisResults.forEach(async (result) => {
-              if (result.detections && result.detections.length > 0 && !result.isError) {
-                try {
-                  const savedDocument = await saveDefectResult(user.$id, result);
-                  
-                  if (savedDocument && savedDocument.$id) {
-                    // Create notification
-                    const newNotification = {
-                      id: savedDocument.$id,
-                      type: 'Detected',
-                      priority: result.detections[0]?.priority?.match(/^(\d+)/)?.[0] || 'N/A',
-                      datetime: formatDateTime(new Date()),
-                      name: result.fileName || 'Unnamed',
-                      file: [result]
-                    };
-                    addNotification(newNotification);
-                  }
-                } catch (saveError) {
-                  console.error('Error saving defect (non-blocking):', saveError);
-                }
-              }
-            });
-          } catch (err) {
-            console.error('Background saving error (non-blocking):', err);
-          }
-        }, 0);
-      }
-
     } catch (error) {
-      console.error('Error in handleResults:', error);
+      console.error('Error:', error);
       Alert.alert(
         'Error',
         error.message || 'Failed to process images. Please try again.'
@@ -233,8 +176,8 @@ export default function AnalysisScreen({ navigation }) {
   return (
     <BackgroundWrapper>
       <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
-        <View style={styles.contentContainer}>
-          <HeaderAnalysis />
+      <View style={styles.contentContainer}>
+        <HeaderAnalysis />
           <ImportSection onPress={pickImage} />
           <FilesList 
             files={uploadedFiles}
