@@ -4,10 +4,17 @@ import Animated, {
   FadeOut,
   FadeIn,
   LinearTransition,
-  SlideOutRight
+  SlideOutRight,
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
 } from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+// This is the default configuration
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, // Reanimated runs in strict mode by default
+});
 export const FileItem = memo(({ file, onRemove }) => (
   <Animated.View 
     entering={FadeIn}
