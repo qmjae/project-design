@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   navText: {
-    fontSize: 14,
+    fontSize: 11,
     marginTop: 5,
     color: '#666',
     fontWeight: 'bold',
