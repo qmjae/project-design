@@ -15,11 +15,9 @@ export default function HomeScreen({ navigation }) {
     <BackgroundWrapper>
       <StatusBar style="dark" />
       <SafeAreaView style={globalStyles.safeArea} edges={['top']}>
-        <ScrollView style={globalStyles.container} showsVerticalScrollIndicator={false}>
           <Header />
           <WelcomeSection />
           <DashboardSection />
-        </ScrollView>
         <ActionButtons navigation={navigation} currentScreen="Home" />
       </SafeAreaView>
     </BackgroundWrapper>
