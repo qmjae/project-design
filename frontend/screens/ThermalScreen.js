@@ -12,7 +12,7 @@ import { colors, shadows } from '../styles/globalStyles';
 import HeaderThermal from '../components/thermal/HeaderThermal';
 import LoadingOverlay from '../components/thermal/LoadingOverlay';
 import SnapshotButton from '../components/thermal/SnapshotButton';
-import generateInitialHTML from '../components/thermal/generateThermalHTML';
+import generateThermalHTML from '../components/thermal/generateThermalHTML';
 import cleanupWebView from '../components/thermal/cleanupWebView';
 
 const ThermalScreen = ({ navigation }) => {
@@ -62,7 +62,9 @@ const ThermalScreen = ({ navigation }) => {
             <WebView
               key={mountKey}
               ref={webViewRef}
-              source={{ html: generateInitialHTML(CAMERA_URL) }}
+              source={{
+                html: generateThermalHTML(CAMERA_URL),
+              }}
               style={styles.webview}
               onLoadEnd={() => setIsLoading(false)}
               onError={() => setIsLoading(false)}
