@@ -19,8 +19,7 @@ const ThermalScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [mountKey, setMountKey] = useState(Date.now());
   const webViewRef = useRef(null);
-  //  const CAMERA_URL = 'http://192.168.194.51:5000/camera';
-  const CAMERA_URL = 'http://192.168.1.18:5000/camera';
+  const CAMERA_URL = 'https://hyena-happy-falcon.ngrok-free.app/camera';
   const screenWidth = Dimensions.get('window').width;
   const containerWidth = screenWidth - 30;
   const containerHeight = containerWidth * (7 / 8);
