@@ -6,11 +6,10 @@ import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderAnalysis } from '../components/analysis/HeaderAnalysis';
 import { ImportSection } from '../components/analysis/ImportSection';
 import { FilesList } from '../components/analysis/FilesList';
-import { uploadFilesToAppwrite } from '../../backend/lib/appwrite';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import ActionButtons from '../components/navigation/ActionButtons';
-import { saveDefectResult } from '../../backend/lib/appwrite';
 import { globalStyles, colors, shadows } from '../styles/globalStyles';
+import { processAndAnalyzeImages } from '../components/common/processAndAnalyzeImages';
 
 export default function AnalysisScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -70,107 +69,7 @@ export default function AnalysisScreen({ navigation }) {
   // Update the handleResults function
 
   const handleResults = async () => {
-    if (uploadedFiles.length === 0) {
-      Alert.alert(
-        "No Images",
-        "No uploaded image! Please upload an image!",
-        [{ text: "OK" }]
-      );
-      return;
-    }
-
-    setIsAnalyzing(true);
-    try {
-      // First, upload files to Appwrite
-      const uploadedFilesData = await uploadFilesToAppwrite(uploadedFiles);
-      console.log('Analysis Screen Uploaded Files Data:', uploadedFilesData);
-
-      // Then process each file for defect detection
-      const analysisResults = await Promise.all(
-        uploadedFiles.map(async (file, index) => {
-          const formData = new FormData();
-          formData.append('file', {
-            uri: file.imageUri,
-            type: file.type || 'image/jpeg',
-            name: file.name
-          });
-
-          const response = await fetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`Analysis failed for ${file.name}`);
-          }
-
-          const result = await response.json();
-          
-          // Combine Appwrite data with detection results
-          return {
-            ...uploadedFilesData[index], // Appwrite file data
-            fileName: file.name,
-            imageUri: file.imageUri,
-            detections: result.detections,
-            uploadId: uploadedFilesData[index].$id // Appwrite file ID
-          };
-        })
-      );
-
-      console.log('Final analysis results:', analysisResults);
-
-      // Save defect results to database BEFORE adding to notifications
-      const savedNotifications = await Promise.all(
-        analysisResults.map(async (result) => {
-          if (result.detections && result.detections.length > 0) {
-            try {
-              // Save to database first to get a valid document ID
-              const savedDocument = await saveDefectResult(user.$id, result);
-              console.log('Saved defect to database:', savedDocument);
-              
-              // Return notification with valid database ID
-              return {
-                id: savedDocument.$id, // Use the actual database ID!
-                type: 'Detected',
-                priority: result.detections[0].priority.match(/^(\d+)/)?.[0],
-                datetime: formatDateTime(new Date()),
-                name: result.fileName,
-                file: [result],
-              };
-            } catch (err) {
-              console.error('Error saving defect:', err);
-              return null;
-            }
-          }
-          return null;
-        })
-      );
-      
-      // Filter out nulls and add to notifications
-      savedNotifications
-        .filter(notification => notification !== null)
-        .forEach(notification => {
-          addNotification(notification);
-        });
-
-      navigation.navigate('Results', { 
-        files: uploadedFiles,
-        analysisResults: analysisResults 
-      });
-
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert(
-        'Error',
-        error.message || 'Failed to process images. Please try again.'
-      );
-    } finally {
-      setIsAnalyzing(false);
-    }
+    processAndAnalyzeImages(uploadedFiles, setIsAnalyzing, addNotification, navigation, user);
   };
 
   return (
@@ -206,7 +105,7 @@ const styles = {
   contentContainer: {
     flex: 1,
     padding: 20,
-    paddingBottom: 90, // Add padding to avoid overlap with bottom navigation
+    paddingBottom: 90,
   },
   resultsButton: {
     alignSelf: 'flex-end',
@@ -215,7 +114,7 @@ const styles = {
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 10, // Add some bottom margin
+    marginBottom: 10,
     ...shadows.light,
   },
   resultsButtonText: {

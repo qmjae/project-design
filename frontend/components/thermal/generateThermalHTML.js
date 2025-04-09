@@ -114,6 +114,20 @@ const generateThermalHTML = (CAMERA_URL) => `
     window.hideOverlay = function() {
       document.getElementById('overlay').style.display = 'none';
     };
+
+    async function captureSnapshot() {
+      const response = await fetch('https://hyena-happy-falcon.ngrok-free.app/snapshot');
+      const blob = await response.blob();
+
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const base64data = reader.result;
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({ event: 'snapshot', data: base64data })
+        );
+      };
+      reader.readAsDataURL(blob);
+    }
   </script>
 </body>
 </html>
