@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import ActionButtons from '../components/navigation/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import { colors, shadows } from '../styles/globalStyles';
@@ -14,12 +16,15 @@ import LoadingOverlay from '../components/thermal/LoadingOverlay';
 import SnapshotButton from '../components/thermal/SnapshotButton';
 import generateThermalHTML from '../components/thermal/generateThermalHTML';
 import cleanupWebView from '../components/thermal/cleanupWebView';
+import { processAndAnalyzeImages } from '../components/common/processAndAnalyzeImages';
 
 const ThermalScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { addNotification, user } = useGlobalContext();
   const [mountKey, setMountKey] = useState(Date.now());
   const webViewRef = useRef(null);
-  const CAMERA_URL = 'https://hyena-happy-falcon.ngrok-free.app/camera';
+  const CAMERA_URL = 'http://192.168.100.198:5000/camera';
   const screenWidth = Dimensions.get('window').width;
   const containerWidth = screenWidth - 30;
   const containerHeight = containerWidth * (7 / 8);
@@ -51,6 +56,29 @@ const ThermalScreen = ({ navigation }) => {
     setMountKey(Date.now());
   };
 
+  const handleSnapshot = async (base64Image) => {
+    try {
+      const fileUri = FileSystem.documentDirectory + `snapshot_${Date.now()}.jpg`;
+      await FileSystem.writeAsStringAsync(fileUri, base64Image.split(',')[1], {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
+      const fileSize = fileInfo.size; // Size in bytes
+
+      const snapshotImage = [{
+        imageUri: fileUri,
+        name: `snapshot_${Date.now()}.jpg`,
+        type: 'image/jpeg',
+        size: fileSize,
+      }];
+
+      processAndAnalyzeImages(snapshotImage, setIsAnalyzing, addNotification, navigation, user);
+    } catch (error) {
+      console.error('Error converting base64 to file:', error);
+    }
+  };
+
   return (
     <BackgroundWrapper>
       <StatusBar style="light" />
@@ -68,13 +96,21 @@ const ThermalScreen = ({ navigation }) => {
               style={styles.webview}
               onLoadEnd={() => setIsLoading(false)}
               onError={() => setIsLoading(false)}
-              onMessage={(event) => {
-              try {
+              onMessage={async (event) => {
+                try {
                   const data = JSON.parse(event.nativeEvent.data);
-                  if (data.event === 'loaded') setIsLoading(false);
-              } catch (e) {
+
+                  if (data.event === 'loaded') {
+                    setIsLoading(false);
+                  } else if (data.event === 'snapshot') {
+                    const base64Image = data.data;
+                    console.log('Received snapshot:', base64Image.substring(0, 100));
+
+                    await handleSnapshot(base64Image);
+                  }
+                } catch (e) {
                   console.error('WebView message parse error:', e);
-              }
+                }
               }}
               javaScriptEnabled
               domStorageEnabled
@@ -89,7 +125,11 @@ const ThermalScreen = ({ navigation }) => {
               <Ionicons name="refresh" size={24} color={colors.text.light} />
             </TouchableOpacity>
           </View>
-          <SnapshotButton/>
+          <SnapshotButton onPress={() => {
+            if (webViewRef.current) {
+              webViewRef.current.injectJavaScript('captureSnapshot();');
+            }
+          }} />
         </View >
         <ActionButtons navigation={navigation} currentScreen="Camera" />
       </SafeAreaView>

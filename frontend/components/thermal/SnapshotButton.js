@@ -1,34 +1,40 @@
-import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity, Text, View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows } from '../../styles/globalStyles';
 
-const handleTakeSnapshot = () => {
-  console.log('Snapshot taken!');
-  //   if (webViewRef.current) {
-  //     webViewRef.current.injectJavaScript(`
-  //       (function() {
-  //         window.showMessage('Taking snapshot...');
-  //         return true;
-  //       })();
-  //     `);
-  //   }
+const SnapshotButton = ({ onPress }) => {
+  const [isCapturing, setIsCapturing] = useState(false);
 
-  //   setTimeout(() => {
-  //     cleanupWebView(webViewRef, false);
-  //     navigation.navigate('Analysis');
-  //   }, 500);
-  //
+  const handlePress = async () => {
+    if (!isCapturing) {
+      setIsCapturing(true);
+      await onPress(); // Wait for the snapshot function to execute
+      setIsCapturing(false);
+    }
+  };
+
+  return (
+    <View style={styles.wrapper}>
+      <TouchableOpacity
+        style={[styles.button, isCapturing && styles.disabledButton]}
+        onPress={handlePress}
+        disabled={isCapturing}
+      >
+        {isCapturing ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <>
+            <Ionicons name="camera" size={24} color="#fff" />
+            <Text style={styles.text}>Take Snapshot</Text>
+          </>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
 };
 
-export default SnapshotButton => (
-  <View style={styles.wrapper}>
-    <TouchableOpacity style={styles.button} onPress={handleTakeSnapshot}>
-      <Ionicons name="camera" size={24} color='#fff' />
-      <Text style={styles.text}>Take Snapshot</Text>
-    </TouchableOpacity>
-  </View>
-);
+export default SnapshotButton;
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -45,6 +51,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 15,
     ...shadows.light,
+  },
+  disabledButton: {
+    backgroundColor: colors.primary + '99', // Make it slightly transparent when disabled
   },
   text: {
     color: '#fff',
