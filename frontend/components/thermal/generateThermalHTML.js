@@ -116,7 +116,7 @@ const generateThermalHTML = (CAMERA_URL) => `
     };
 
     async function captureSnapshot() {
-      const response = await fetch('https://hyena-happy-falcon.ngrok-free.app/snapshot');
+      const response = await fetch('http://192.168.100.198:5000/snapshot');
       const blob = await response.blob();
 
       const reader = new FileReader();

@@ -28,30 +28,47 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
         formData.append('file', {
           uri: file.imageUri,
           type: file.type || 'image/jpeg',
-          name: file.name
+          name: file.name,
         });
 
-        const response = await fetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const tryFetch = async (url) => {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'multipart/form-data',
+            },
+          });
 
-        if (!response.ok) {
-          throw new Error(`Analysis failed for ${file.name}`);
+          if (!response.ok) {
+            throw new Error(`Fetch failed with status: ${response.status}`);
+          }
+
+          return response.json();
+        };
+
+        let result;
+        try {
+          // Try primary server
+          result = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/');
+        } catch (errPrimary) {
+          console.warn(`Primary server failed for ${file.name}: ${errPrimary.message}`);
+          try {
+            // Fallback to secondary server
+            result = await tryFetch('https://midge-unique-cow.ngrok-free.app/detect/');
+          } catch (errSecondary) {
+            console.error(`Secondary server also failed for ${file.name}: ${errSecondary.message}`);
+            throw new Error(`Analysis failed for ${file.name}`);
+          }
         }
 
-        const result = await response.json();
-
         return {
-          ...uploadedFilesData[index], // Appwrite file data
+          ...uploadedFilesData[index],
           fileName: file.name,
           imageUri: file.imageUri,
           detections: result.detections,
-          uploadId: uploadedFilesData[index].$id, // Appwrite file ID
+          uploadId: uploadedFilesData[index].$id,
         };
       })
     );
