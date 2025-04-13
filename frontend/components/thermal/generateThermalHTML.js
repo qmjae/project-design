@@ -116,7 +116,7 @@ const generateThermalHTML = (CAMERA_URL) => `
     };
 
     async function captureSnapshot() {
-      const response = await fetch('http://192.168.100.198:5000/snapshot');
+      const response = await fetch('http://192.168.12.92:5000/snapshot');
       const blob = await response.blob();
 
       const reader = new FileReader();
