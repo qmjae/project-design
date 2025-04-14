@@ -110,6 +110,7 @@ async def detect_defects(file: UploadFile = File(...)):
                         "priority": defect_info.severityLevel,
                         "powerLoss": defect_info.powerLoss,
                         "category": defect_info.category,
+                        "CoA": defect_info.CoA,
                         "stressFactors": defect_info.stressFactors,
                         "description": defect_info.description,
                         "recommendations": defect_info.recommendations
