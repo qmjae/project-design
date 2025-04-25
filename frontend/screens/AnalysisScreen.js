@@ -33,10 +33,10 @@ export default function AnalysisScreen({ navigation }) {
   };
 
   const pickImage = async () => {
-    if (uploadedFiles.length >= 5) {
+    if (uploadedFiles.length >= 3) {
       Alert.alert(
         "Upload Limit Reached!",
-        "You can only upload up to 5 images!",
+        "You can only upload up to 3 images!",
         [{ text: "OK" }]
       );
       return;

@@ -51,12 +51,14 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
         let result;
         try {
           // Try primary server
-          result = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/');
+          //result = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/'); 
+          result = await tryFetch('http://192.168.1.18:8000/detect/'); 
         } catch (errPrimary) {
           console.warn(`Primary server failed for ${file.name}: ${errPrimary.message}`);
           try {
             // Fallback to secondary server
-            result = await tryFetch('https://midge-unique-cow.ngrok-free.app/detect/');
+            result = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/'); 
+           // result = await tryFetch('https://midge-unique-cow.ngrok-free.app/detect/');
           } catch (errSecondary) {
             console.error(`Secondary server also failed for ${file.name}: ${errSecondary.message}`);
             throw new Error(`Analysis failed for ${file.name}`);

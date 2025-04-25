@@ -24,7 +24,8 @@ const ThermalScreen = ({ navigation }) => {
   const { addNotification, user } = useGlobalContext();
   const [mountKey, setMountKey] = useState(Date.now());
   const webViewRef = useRef(null);
-  const CAMERA_URL = 'http://192.168.12.92:5000/camera';
+ // const CAMERA_URL = 'http://192.168.12.92:5000/camera'; // prod
+  const CAMERA_URL = 'http://192.168.1.18:5000/camera';
   const screenWidth = Dimensions.get('window').width;
   const containerWidth = screenWidth - 30;
   const containerHeight = containerWidth * (7 / 8);
