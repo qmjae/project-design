@@ -17,6 +17,7 @@ import SnapshotButton from '../components/thermal/SnapshotButton';
 import generateThermalHTML from '../components/thermal/generateThermalHTML';
 import cleanupWebView from '../components/thermal/cleanupWebView';
 import { processAndAnalyzeImages } from '../components/common/processAndAnalyzeImages';
+import { CAMERA_URL, SNAPSHOT_API_URL } from '../config'
 
 const ThermalScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +25,6 @@ const ThermalScreen = ({ navigation }) => {
   const { addNotification, user } = useGlobalContext();
   const [mountKey, setMountKey] = useState(Date.now());
   const webViewRef = useRef(null);
-  const CAMERA_URL = 'http://192.168.100.198:5000/camera';
   const screenWidth = Dimensions.get('window').width;
   const containerWidth = screenWidth - 30;
   const containerHeight = containerWidth * (7 / 8);
@@ -91,7 +91,7 @@ const ThermalScreen = ({ navigation }) => {
               key={mountKey}
               ref={webViewRef}
               source={{
-                html: generateThermalHTML(CAMERA_URL),
+                html: generateThermalHTML(CAMERA_URL, SNAPSHOT_API_URL),
               }}
               style={styles.webview}
               onLoadEnd={() => setIsLoading(false)}

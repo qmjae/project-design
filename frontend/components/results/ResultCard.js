@@ -118,10 +118,7 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
               label="Stress factors" 
               value={detection?.stressFactors?.join(', ') || 'N/A'} 
             />
-            <DetailRow 
-              label="Severity Level" 
-              value={detection?.priority || 'N/A'} 
-            />
+            
             <DetailRow 
               label="Power Loss" 
               value={detection?.powerLoss || 'N/A'} 
@@ -129,6 +126,11 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
             <DetailRow 
               label="Category" 
               value={detection?.category || 'N/A'} 
+            />
+            
+            <DetailRow 
+              label="CoA" 
+              value={detection?.CoA || 'N/A'} 
             />
 
             <Section 
