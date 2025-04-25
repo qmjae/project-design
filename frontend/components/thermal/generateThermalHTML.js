@@ -1,4 +1,4 @@
-const generateThermalHTML = (CAMERA_URL) => `
+const generateThermalHTML = (CAMERA_API_URL, SNAPSHOT_API_URL) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,7 +71,7 @@ const generateThermalHTML = (CAMERA_URL) => `
         const loading = document.getElementById('loading');
         
         // First, let's try to fetch the content with the headers
-        const response = await fetch('${CAMERA_URL}', {
+        const response = await fetch('${CAMERA_API_URL}', {
           headers: {
             'ngrok-skip-browser-warning': 'true',
             'User-Agent': 'Mozilla/5.0'
@@ -87,7 +87,7 @@ const generateThermalHTML = (CAMERA_URL) => `
           };
           
           // Create a URL with header parameters to bypass ngrok warning
-          frame.src = '${CAMERA_URL}?ngrok-skip-browser-warning=69420';
+          frame.src = '${CAMERA_API_URL}?ngrok-skip-browser-warning=69420';
         } else {
           throw new Error('Failed to load camera feed');
         }
@@ -116,7 +116,7 @@ const generateThermalHTML = (CAMERA_URL) => `
     };
 
     async function captureSnapshot() {
-      const response = await fetch('http://192.168.1.18:5000/snapshot');
+      const response = await fetch('${SNAPSHOT_API_URL}');
       const blob = await response.blob();
 
       const reader = new FileReader();
