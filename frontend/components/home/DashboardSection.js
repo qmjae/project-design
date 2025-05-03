@@ -7,6 +7,20 @@ import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { getDefectHistory } from '../../../backend/lib/appwrite';
 import { colors, shadows, borderRadius } from '../../styles/globalStyles';
 
+// Add class name mapping
+const classNameMapping = {
+  'substring': 'Bypass Diode Failure',
+  'short-circuit': 'Short Circuit',
+  'open-circuit': 'Open Circuit',
+  'single-cell': 'Single Cell'
+};
+
+// Function to get display name
+const getDisplayName = (className) => {
+  if (!className) return 'Unknown';
+  return classNameMapping[className.toLowerCase()] || className;
+};
+
 const screenWidth = Dimensions.get('window').width - 40;
 
 export default function DashboardSection() {
@@ -47,9 +61,6 @@ export default function DashboardSection() {
           n.id === historyItem.$id
         );
         
-// Update the part where you determine the type of a defect from history
-
-        // Inside your useMemo calculation, modify this section:
         if (!exists) {
           // Check for the status field using the correct enum values
           const isResolved = historyItem.status === 'resolved';
@@ -91,7 +102,8 @@ export default function DashboardSection() {
     combinedData.forEach(notification => {
       if (notification.file && notification.file[0]?.detections) {
         notification.file[0].detections.forEach(detection => {
-          const defectClass = detection.class || 'Unknown';
+          // Use the display name instead of the raw class name
+          const defectClass = getDisplayName(detection.class) || 'Unknown';
           defectTypes[defectClass] = (defectTypes[defectClass] || 0) + 1;
         });
       }
@@ -114,7 +126,7 @@ export default function DashboardSection() {
       // Use different colors for each defect type
       const colorOptions = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
       return {
-        name: type,
+        name: type, // This is already using the mapped display name
         count: defectTypes[type],
         color: colorOptions[index % colorOptions.length],
         legendFontColor: '#7F7F7F',
@@ -158,7 +170,7 @@ export default function DashboardSection() {
       totalDefects,
       resolvedDefects,
       pendingDefects,
-      mostCommonDefect: mostCommonDefect.charAt(0).toUpperCase() + mostCommonDefect.slice(1).replace('-', ' '),
+      mostCommonDefect,
       resolvedPercentage,
       pieData,
       lineChartData: {

@@ -9,6 +9,21 @@ import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { saveDefectResult } from '../../../backend/lib/appwrite';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+// Add a mapping object to display user-friendly class names
+const classNameMapping = {
+  'substring': 'Bypass Diode Failure',
+  // Add other mappings as needed
+  'short-circuit': 'Short Circuit',
+  'open-circuit': 'Open Circuit',
+  'single-cell': 'Single Cell'
+};
+
+// Function to get user-friendly display name
+const getDisplayName = (className) => {
+  if (!className) return 'No defect detected';
+  return classNameMapping[className.toLowerCase()] || className;
+};
+
 export const ResultCard = memo(({ item, width, notificationId }) => {
   const navigation = useNavigation();
   const { user, updateNotificationType, addNotification } = useGlobalContext();
@@ -111,7 +126,7 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
         />
           
         <View style={styles.contentContainer}>
-          <ModuleInfo defectName={detection?.class || 'No defect detected'} />
+          <ModuleInfo defectName={getDisplayName(detection?.class)} />
 
           <View style={styles.detailsContainer}>
             <DetailRow 
