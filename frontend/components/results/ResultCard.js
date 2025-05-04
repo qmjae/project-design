@@ -128,6 +128,13 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
     }
   }
   
+  // Check if this item has been classified as containing a solar panel or not
+  // Default to true for backward compatibility
+  const containsSolarPanel = item.containsSolarPanel !== false;
+  
+  // Custom message from notification, if present
+  const customMessage = item.message || (item.file && item.file[0]?.message);
+  
   return (
     <View style={[styles.resultCard, { width }]}>
       <ScrollView 
@@ -140,61 +147,76 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
         />
           
         <View style={styles.contentContainer}>
-          <ModuleInfo defectName={getDisplayName(detection?.class)} />
+          <ModuleInfo 
+            defectName={getDisplayName(detection?.class)}
+            containsSolarPanel={containsSolarPanel}
+            message={customMessage}
+          />
 
-          <View style={styles.detailsContainer}>
-            <DetailRow 
-              label="Stress factors" 
-              value={(detection?.stressFactors && Array.isArray(detection.stressFactors)) ? 
-                detection.stressFactors.join(', ') : 'N/A'} 
-            />
-            
-            <DetailRow 
-              label="Power Loss" 
-              value={detection?.powerLoss || 'N/A'} 
-            />
-            <DetailRow 
-              label="Category" 
-              value={detection?.category || 'N/A'} 
-            />
-            
-            <DetailRow 
-              label="CoA" 
-              value={detection?.CoA || 'N/A'} 
-            />
+          {/* Only show details if it's a solar panel */}
+          {containsSolarPanel && (
+            <View style={styles.detailsContainer}>
+              {/* Only show these details if a defect is detected */}
+              {detection && detection.class && !detection.class.toLowerCase().includes('no defect') ? (
+                <>
+                  <DetailRow 
+                    label="Stress factors" 
+                    value={(detection?.stressFactors && Array.isArray(detection.stressFactors)) ? 
+                      detection.stressFactors.join(', ') : 'N/A'} 
+                  />
+                  
+                  <DetailRow 
+                    label="Power Loss" 
+                    value={detection?.powerLoss || 'N/A'} 
+                  />
+                  <DetailRow 
+                    label="Category" 
+                    value={detection?.category || 'N/A'} 
+                  />
+                  
+                  <DetailRow 
+                    label="CoA" 
+                    value={detection?.CoA || 'N/A'} 
+                  />
 
-            <Section 
-              title="Description"
-              content={detection?.description || 'No description available'}
-            />
+                  <Section 
+                    title="Description"
+                    content={detection?.description || 'No description available'}
+                  />
 
-            <Section 
-              title="Recommendation"
-              content={(detection?.recommendations && Array.isArray(detection.recommendations)) ?
-                detection.recommendations.join('\n') : 'No recommendations available'}
-            />
-          </View>
+                  <Section 
+                    title="Recommendation"
+                    content={(detection?.recommendations && Array.isArray(detection.recommendations)) ?
+                      detection.recommendations.join('\n') : 'No recommendations available'}
+                  />
+                </>
+              ) : null}
+            </View>
+          )}
         </View>
       </ScrollView>
 
-      <View style={styles.buttonContainer}>
-        {isResolved ? (
-          <View style={styles.resolvedStatus}>
-            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-            <Text style={styles.resolvedStatusText}>Resolved</Text>
-          </View>
-        ) : (
-          <TouchableOpacity 
-            style={[styles.resolvedButton, isResolving && styles.resolvedButtonDisabled]}
-            onPress={handleResolve}
-            disabled={isResolving}
-          >
-            <Text style={styles.resolvedButtonText}>
-              {isResolving ? 'Resolving...' : 'Resolve'}
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {/* Only show resolve button for solar panels with defects */}
+      {containsSolarPanel && detection && detection.class && !detection.class.includes('no defect') && (
+        <View style={styles.buttonContainer}>
+          {isResolved ? (
+            <View style={styles.resolvedStatus}>
+              <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+              <Text style={styles.resolvedStatusText}>Resolved</Text>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={[styles.resolvedButton, isResolving && styles.resolvedButtonDisabled]}
+              onPress={handleResolve}
+              disabled={isResolving}
+            >
+              <Text style={styles.resolvedButtonText}>
+                {isResolving ? 'Resolving...' : 'Resolve'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
     </View>
   );
 });

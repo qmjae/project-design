@@ -139,6 +139,7 @@ export default function NotificationsSection() {
     console.log("Handling notification click:", {
       id: notification.id,
       type: notification.type,
+      message: notification.message,
       fileData: notification.file
     });
     
@@ -153,11 +154,25 @@ export default function NotificationsSection() {
           fileDataArray = Array.isArray(notification.file) ? 
                          notification.file : 
                          (typeof notification.file === 'object' ? [notification.file] : []);
+          
+          // Important: If there's a custom message in the notification, add it to all file objects
+          if (notification.message) {
+            fileDataArray = fileDataArray.map(file => ({
+              ...file,
+              message: notification.message,
+              // For "No solar panel" warnings, explicitly set containsSolarPanel to false
+              containsSolarPanel: notification.message && 
+                notification.message.toLowerCase().includes('no solar panel') ? false : true
+            }));
+          }
         } else if (notification.imageUrl) {
           // Handle historical defects that don't use the file property
           fileDataArray = [{
             fileName: notification.name || notification.fileName,
             imageUrl: notification.imageUrl,
+            message: notification.message, // Add the message if it exists
+            containsSolarPanel: !(notification.message && 
+              notification.message.toLowerCase().includes('no solar panel')),
             detections: [{
               class: notification.defectClass,
               priority: notification.priority
@@ -167,6 +182,9 @@ export default function NotificationsSection() {
           // Fallback for cases with minimal data
           fileDataArray = [{
             fileName: notification.name || 'Unknown',
+            message: notification.message, // Add the message if it exists
+            containsSolarPanel: !(notification.message && 
+              notification.message.toLowerCase().includes('no solar panel')),
             detections: [{ 
               class: 'Unknown',
               priority: notification.priority || 'Medium'
@@ -194,6 +212,9 @@ export default function NotificationsSection() {
           analysisResults: [{
             fileName: notification.name || 'Unknown defect',
             databaseId: notification.id,
+            message: notification.message,
+            containsSolarPanel: !(notification.message && 
+              notification.message.toLowerCase().includes('no solar panel')),
             detections: [{ class: 'Unknown', priority: notification.priority || 'Medium' }]
           }],
         });
@@ -262,10 +283,16 @@ export default function NotificationsSection() {
                 </Svg>
                 <View style={styles.notificationContent}>
                   <Text style={styles.notificationTitle}>
-                    Defect {notification.type}
+                    {notification.message && notification.type === 'Info' 
+                      ? 'Panel Info' 
+                      : notification.message && notification.type === 'Warning'
+                        ? 'Warning'
+                        : `Defect ${notification.type}`}
                   </Text>
                   <Text style={styles.notificationDetails}>
-                    {notification.file && notification.file[0]?.detections && 
+                    {notification.message ? (
+                      <Text style={styles.defectClassText}>{notification.message}{" "}</Text>
+                    ) : notification.file && notification.file[0]?.detections && 
                       notification.file[0]?.detections[0]?.class && (
                       <Text style={styles.defectClassText}>
                         {getDisplayName(notification.file[0].detections[0].class)}{" "}

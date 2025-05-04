@@ -1,30 +1,59 @@
 import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export default HeaderThermal => (
-  <SafeAreaView>
-    <View style={styles.header}>
-    <View style={styles.headerTitleContainer}>
-      <Text style={styles.headerTitle}>Thermal Camera</Text>
-    </View>
-    </View>
-  </SafeAreaView>
-);
+export const HeaderThermal = ({ title = "Thermal Camera", showBackButton = false, onBack }) => {
+  const navigation = useNavigation();
+
+  const handleTestNavigation = () => {
+    navigation.navigate('ThermalTest');
+  };
+
+  return (
+    <SafeAreaView>
+      <View style={styles.header}>
+        {showBackButton && (
+          <TouchableOpacity style={styles.backButton} onPress={onBack}>
+            <Ionicons name="arrow-back" size={24} color="#FFD700" />
+          </TouchableOpacity>
+        )}
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>{title}</Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.testButton} 
+          onPress={handleTestNavigation}
+        >
+          <Ionicons name="flask-outline" size={24} color="#FFD700" />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
+    paddingHorizontal: 10,
+    height: 50,
   },
   headerTitleContainer: {
     flex: 1,
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 29,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFD700',
+  },
+  backButton: {
+    padding: 8,
+  },
+  testButton: {
+    padding: 8,
   },
 });
