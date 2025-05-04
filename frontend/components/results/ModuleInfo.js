@@ -3,18 +3,13 @@ import { View, Text, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export const ModuleInfo = ({ defectName, containsSolarPanel = true, message }) => {
-  // If a specific message is provided, use that (for special cases)
-  if (message) {
-    return (
-      <View style={styles.moduleInfo}>
-        <Text style={styles.moduleTitle}>{message}</Text>
-        {containsSolarPanel && <Text style={styles.moduleSubtitle}>(crystalline Si)</Text>}
-      </View>
-    );
-  }
+  // Check if this is a "no solar panel" message, regardless of how it was passed
+  const isNoSolarPanelMessage = 
+    containsSolarPanel === false || 
+    (message && message.toLowerCase().includes('no solar panel'));
   
-  // If not a solar panel, show the specific message
-  if (containsSolarPanel === false) {
+  // Special case: No solar panel detected
+  if (isNoSolarPanelMessage) {
     return (
       <View style={[styles.moduleInfo, styles.errorContainer]}>
         <View style={styles.errorHeader}>
@@ -24,6 +19,31 @@ export const ModuleInfo = ({ defectName, containsSolarPanel = true, message }) =
         <Text style={styles.errorMessage}>
           This image does not appear to contain a solar panel. Please upload an image of a solar panel for defect detection.
         </Text>
+      </View>
+    );
+  }
+
+    // // Special case: No solar panel detected
+    // if (isNoSolarPanelMessage) {
+    //   return (
+    //     <View style={[styles.moduleInfo, styles.infoContainer]}>
+    //       <View style={styles.infoHeader}>
+    //         <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+    //         <Text style={[styles.moduleTitle, styles.infoTitle]}>No defects detected</Text>
+    //       </View>
+    //       <Text style={styles.infoMessage}>
+    //       This solar panel appears to be functioning normally with no visible defects.
+    //       </Text>
+    //     </View>
+    //   );
+    // }
+  
+  // If a specific message is provided for other cases, use that
+  if (message) {
+    return (
+      <View style={styles.moduleInfo}>
+        <Text style={styles.moduleTitle}>{message}</Text>
+        <Text style={styles.moduleSubtitle}>(crystalline Si)</Text>
       </View>
     );
   }
