@@ -9,6 +9,20 @@ import ActionButtons from '../components/navigation/ActionButtons';
 import { globalStyles, colors, borderRadius, shadows } from '../styles/globalStyles';
 import { StatusBar } from 'expo-status-bar';
 
+// Add class name mapping
+const classNameMapping = {
+  'substring': 'Bypass Diode Failure',
+  'short-circuit': 'Short Circuit',
+  'open-circuit': 'Open Circuit',
+  'single-cell': 'Single Cell'
+};
+
+// Function to get display name
+const getDisplayName = (className) => {
+  if (!className) return 'Unknown Defect';
+  return classNameMapping[className.toLowerCase()] || className;
+};
+
 export default function DefectHistoryScreen({ navigation, route }) {
   const { notificationId, fileName } = route.params || {}
   const [defectHistory, setDefectHistory] = useState([]);
@@ -73,7 +87,7 @@ export default function DefectHistoryScreen({ navigation, route }) {
             <HeaderHistory 
               onBack={handleOnBack} 
               showBackButton={true}
-              title={selectedDefect.defectClass || 'Defect Details'} 
+              title={getDisplayName(selectedDefect.defectClass) || 'Defect Details'} 
             />
             <ScrollView style={styles.content}>
               {selectedDefect.imageUrl && (
@@ -86,7 +100,7 @@ export default function DefectHistoryScreen({ navigation, route }) {
               <View style={styles.detailsContainer}>
                 <View style={styles.detailRow}>
                   <Text style={styles.label}>Defect Type:</Text>
-                  <Text style={styles.value}>{selectedDefect.defectClass || 'Unknown'}</Text>
+                  <Text style={styles.value}>{getDisplayName(selectedDefect.defectClass) || 'Unknown'}</Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.label}>Severity:</Text>

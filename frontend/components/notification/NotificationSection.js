@@ -6,6 +6,20 @@ import { AntDesign } from '@expo/vector-icons';
 import { useGlobalContext } from '../../../backend/context/GlobalProvider';
 import { getDefectHistory } from '../../../backend/lib/appwrite';
 
+// Add class name mapping
+const classNameMapping = {
+  'substring': 'Bypass Diode Failure',
+  'short-circuit': 'Short Circuit',
+  'open-circuit': 'Open Circuit',
+  'single-cell': 'Single Cell'
+};
+
+// Function to get display name
+const getDisplayName = (className) => {
+  if (!className) return 'Unknown Defect';
+  return classNameMapping[className.toLowerCase()] || className;
+};
+
 const getNotificationType = (type, status) => {
   // Check both type and status since data can come from different sources
   if (type === 'Resolved' || status === 'resolved') {
@@ -184,7 +198,7 @@ export default function NotificationsSection() {
                     {notification.file && notification.file[0]?.detections && 
                       notification.file[0]?.detections[0]?.class && (
                       <Text style={styles.defectClassText}>
-                        {notification.file[0].detections[0].class}{" "}
+                        {getDisplayName(notification.file[0].detections[0].class)}{" "}
                       </Text>
                     )}
                     {notification.priority && (

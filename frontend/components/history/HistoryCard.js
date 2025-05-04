@@ -2,6 +2,20 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+// Add class name mapping
+const classNameMapping = {
+  'substring': 'Bypass Diode Failure',
+  'short-circuit': 'Short Circuit',
+  'open-circuit': 'Open Circuit',
+  'single-cell': 'Single Cell'
+};
+
+// Function to get display name
+const getDisplayName = (className) => {
+  if (!className) return 'Unknown Defect';
+  return classNameMapping[className.toLowerCase()] || className;
+};
+
 export const HistoryCard = ({ defect, onPress }) => {
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -27,7 +41,7 @@ export const HistoryCard = ({ defect, onPress }) => {
         </View>
         <View style={styles.contentContainer}>
           <Text style={styles.defectType}>
-            {defect.defectClass || 'Unknown Defect'}
+            {getDisplayName(defect.defectClass)}
           </Text>
           <Text style={styles.date}>
             {formatDate(defect.DateTime)}

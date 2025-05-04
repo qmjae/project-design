@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Default configuration values
 const defaultConfig = {
-  BACKEND_API_URL: "http://192.168.191.111:8000/detect/",
+  BACKEND_API_URL: "http://192.168.1.10:8000/detect/",
   CAMERA_URL: "http://192.168.191.111:5000/camera",
   SNAPSHOT_API_URL: "http://192.168.191.111:5000/snapshot"
 };
