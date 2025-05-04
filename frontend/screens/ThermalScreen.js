@@ -11,7 +11,7 @@ import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import ActionButtons from '../components/navigation/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
 import { colors, shadows } from '../styles/globalStyles';
-import HeaderThermal from '../components/thermal/HeaderThermal';
+import { HeaderThermal } from '../components/thermal/HeaderThermal';
 import LoadingOverlay from '../components/thermal/LoadingOverlay';
 import SnapshotButton from '../components/thermal/SnapshotButton';
 import generateThermalHTML from '../components/thermal/generateThermalHTML';

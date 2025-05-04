@@ -1,6 +1,7 @@
 import { uploadFilesToAppwrite, saveDefectResult } from '../../../backend/lib/appwrite';
 import { Alert } from 'react-native';
 import { BACKEND_API_URL } from '../../config';
+import { isSolarPanel } from './thermalPatternAnalysis';
 
 /**
  * Processes images for defect detection, saves results, and navigates to the results screen.
@@ -64,12 +65,16 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
           }
         }
 
+        // NEW: Check if the image contains a solar panel
+        const containsSolarPanel = isSolarPanel(result, file.imageUri);
+        
         return {
           ...uploadedFilesData[index],
           fileName: file.name,
           imageUri: file.imageUri,
           detections: result.detections,
           uploadId: uploadedFilesData[index].$id,
+          containsSolarPanel: containsSolarPanel // Add this flag to the result
         };
       })
     );
@@ -79,7 +84,27 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
     // Step 3: Save defect results and create notifications
     const savedNotifications = await Promise.all(
       analysisResults.map(async (result) => {
+        // NEW: Check if it's a solar panel before processing defects
+        if (!result.containsSolarPanel) {
+          // Return notification for non-solar panel image
+          return {
+            id: `no-solar-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            type: 'Warning',
+            priority: 'High',
+            datetime: new Date().toISOString(),
+            name: result.fileName,
+            message: 'No solar panel detected in this image',
+            file: [{
+              fileName: result.fileName,
+              imageUri: result.imageUri,
+              detections: [] // No defects since it's not a solar panel
+            }]
+          };
+        }
+        
+        // Process solar panel images
         if (result.detections && result.detections.length > 0) {
+          // Solar panel with defects detected
           try {
             const savedDocument = await saveDefectResult(user.$id, result);
             console.log('Saved defect to database:', savedDocument);
@@ -96,14 +121,33 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
             console.error('Error saving defect:', err);
             return null;
           }
+        } else {
+          // NEW: Solar panel with no defects - don't create a notification
+          // This will prevent it from showing up in the notifications section altogether
+          return {
+            id: `no-defect-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            type: 'Info',
+            priority: 'Low',
+            datetime: new Date().toISOString(),
+            name: result.fileName,
+            message: 'No defects detected on this solar panel',
+            file: [{
+              fileName: result.fileName,
+              imageUri: result.imageUri,
+              detections: [{
+                class: 'No defect',
+                priority: 'Low'
+              }] 
+            }],
+            skipNotification: true // Add flag to skip adding to notifications
+          };
         }
-        return null;
       })
     );
 
-    // Step 4: Add notifications
+    // Step 4: Add notifications - filter out nulls and notifications flagged to skip
     savedNotifications
-      .filter(notification => notification !== null)
+      .filter(notification => notification !== null && !notification.skipNotification)
       .forEach(notification => addNotification(notification));
 
     // Step 5: Navigate to Results
