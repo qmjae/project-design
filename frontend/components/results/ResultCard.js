@@ -112,7 +112,21 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
     }
   };
 
-  const detection = item.detections && item.detections[0];
+  // Make sure detection is properly handled
+  let detection = null;
+  
+  // Properly handle detections which might not be an array
+  if (item.detections) {
+    // Handle the case where detections might not be an array but a direct object
+    if (Array.isArray(item.detections)) {
+      detection = item.detections[0] || null;
+    } else {
+      // If detections is an object but not an array, use it directly
+      detection = item.detections;
+      // Also fix the item structure to make detections an array for future operations
+      item.detections = [item.detections];
+    }
+  }
   
   return (
     <View style={[styles.resultCard, { width }]}>
@@ -121,8 +135,8 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
         contentContainerStyle={styles.scrollContent}
       >
         <BoundedImage 
-          imageUri={item.imageUri} 
-          detections={item.detections}
+          imageUri={item.imageUri || (item.imageUrl || '')} 
+          detections={item.detections || []}
         />
           
         <View style={styles.contentContainer}>
@@ -131,7 +145,8 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
           <View style={styles.detailsContainer}>
             <DetailRow 
               label="Stress factors" 
-              value={detection?.stressFactors?.join(', ') || 'N/A'} 
+              value={(detection?.stressFactors && Array.isArray(detection.stressFactors)) ? 
+                detection.stressFactors.join(', ') : 'N/A'} 
             />
             
             <DetailRow 
@@ -155,7 +170,8 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
 
             <Section 
               title="Recommendation"
-              content={detection?.recommendations?.join('\n') || 'No recommendations available'}
+              content={(detection?.recommendations && Array.isArray(detection.recommendations)) ?
+                detection.recommendations.join('\n') : 'No recommendations available'}
             />
           </View>
         </View>

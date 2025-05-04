@@ -10,6 +10,9 @@ const GlobalProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  
+  // Track dismissed history notifications to prevent them from reappearing
+  const [dismissedHistoryIds, setDismissedHistoryIds] = useState([]);
 
   useEffect(() => {
     getCurrentUser()
@@ -41,7 +44,17 @@ const GlobalProvider = ({ children }) => {
     catch(error){
         console.error('Error removing notification:', error);
     }
-    
+  };
+  
+  // Add a new function to dismiss history notifications
+  const dismissHistoryNotification = (id) => {
+    try {
+      console.log(`Dismissing history notification with ID: ${id}`);
+      // Add this ID to our list of dismissed history notifications
+      setDismissedHistoryIds(prev => [...prev, id]);
+    } catch (error) {
+      console.error('Error dismissing history notification:', error);
+    }
   };
 
   // Improved updateNotificationType function
@@ -92,7 +105,9 @@ const GlobalProvider = ({ children }) => {
         notifications,
         addNotification,
         removeNotification,
-        updateNotificationType
+        updateNotificationType,
+        dismissHistoryNotification,
+        dismissedHistoryIds
       }}
     >
       {children}

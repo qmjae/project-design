@@ -40,7 +40,7 @@ const formatDate = (dateString) => {
 
 export default function NotificationsSection() {
   const navigation = useNavigation();
-  const { notifications, removeNotification, user } = useGlobalContext();
+  const { notifications, removeNotification, dismissHistoryNotification, dismissedHistoryIds, user } = useGlobalContext();
   const [combinedNotifications, setCombinedNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,30 +56,35 @@ export default function NotificationsSection() {
           const historyItems = await getDefectHistory(user.$id);
           
           // Process history items to match notification format
-          const historyNotifications = historyItems.map(item => {
-            // Create a valid file array with proper structure
-            const fileObject = {
-              fileName: item.fileName,
-              imageUrl: item.imageUrl,
-              detections: [{
-                class: item.defectClass,
+          const historyNotifications = historyItems
+            // Filter out history items that have been dismissed
+            .filter(item => !dismissedHistoryIds.includes(item.$id))
+            .map(item => {
+              // Create a valid file array with proper structure
+              const fileObject = {
+                fileName: item.fileName,
+                imageUrl: item.imageUrl,
+                detections: [{
+                  class: item.defectClass,
+                  priority: item.priority,
+                  // Add other fields that might be expected
+                  description: item.description || ''
+                }]
+              };
+              
+              return {
+                id: item.$id,
+                type: item.status === 'resolved' ? 'Resolved' : 'Detected',
+                name: item.fileName,
                 priority: item.priority,
-                // Add other fields that might be expected
-                description: item.description || ''
-              }]
-            };
-            
-            return {
-              id: item.$id,
-              type: item.status === 'resolved' ? 'Resolved' : 'Detected',
-              name: item.fileName,
-              priority: item.priority,
-              datetime: formatDate(item.DateTime),
-              status: item.status,
-              // Always make file an array, even if it's just one item
-              file: [fileObject]
-            };
-          });
+                datetime: formatDate(item.DateTime),
+                status: item.status,
+                // Always make file an array, even if it's just one item
+                file: [fileObject],
+                // Important flag to know if it's from history
+                isFromHistory: true
+              };
+            });
           
           // Combine with local notifications, filtering out duplicates
           const localNotifIds = new Set(notifications.map(n => n.id));
@@ -99,39 +104,104 @@ export default function NotificationsSection() {
     };
     
     fetchAllNotifications();
-  }, [notifications, user]);
+  }, [notifications, user, dismissedHistoryIds]); // Add dismissedHistoryIds as a dependency
 
-
-  // Update the handleNotification function
+  // Updated handleDeleteNotification to handle both local and history notifications
+  const handleDeleteNotification = async (notification) => {
+    try {
+      console.log("Deleting notification with ID:", notification.id);
+      
+      // If it's a local notification, use the existing removeNotification function
+      if (!notification.isFromHistory) {
+        removeNotification(notification.id);
+      } else {
+        // For history items, we mark them as dismissed
+        dismissHistoryNotification(notification.id);
+        
+        // Also update our local state for immediate UI feedback
+        setCombinedNotifications(prev => 
+          prev.filter(item => item.id !== notification.id)
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  };
 
   const handleNotification = (notification) => {
-    // Ensure we have a valid file array before navigating
-    const fileData = notification.file || [];
+    // Ensure we have a valid notification with an ID
+    if (!notification || !notification.id) {
+      console.error("Invalid notification: missing ID", notification);
+      return;
+    }
     
+    // Log the notification structure for debugging
     console.log("Handling notification click:", {
       id: notification.id,
       type: notification.type,
-      fileData: fileData
+      fileData: notification.file
     });
     
     // Always pass the notification ID (which should be a valid database ID)
     if (notification.type !== 'Resolved') {
-      // For each fileData item, attach the notification ID so ResultCard can access it
-      const fileDataWithIds = Array.isArray(fileData) ? 
-        fileData.map(file => ({
-          ...file,
-          databaseId: notification.id // Ensure the database ID is passed along
-        })) : 
-        [{...fileData, databaseId: notification.id}];
+      // Handle the file property which can be in different formats
+      let fileDataArray = [];
       
-      navigation.navigate('Results', {
-        notificationId: notification.id,
-        analysisResults: fileDataWithIds,
-      });
+      try {
+        if (notification.file) {
+          // Make sure we have an array of file data
+          fileDataArray = Array.isArray(notification.file) ? 
+                         notification.file : 
+                         (typeof notification.file === 'object' ? [notification.file] : []);
+        } else if (notification.imageUrl) {
+          // Handle historical defects that don't use the file property
+          fileDataArray = [{
+            fileName: notification.name || notification.fileName,
+            imageUrl: notification.imageUrl,
+            detections: [{
+              class: notification.defectClass,
+              priority: notification.priority
+            }]
+          }];
+        } else {
+          // Fallback for cases with minimal data
+          fileDataArray = [{
+            fileName: notification.name || 'Unknown',
+            detections: [{ 
+              class: 'Unknown',
+              priority: notification.priority || 'Medium'
+            }]
+          }];
+        }
+        
+        // For each fileData item, attach the notification ID so ResultCard can access it
+        const fileDataWithIds = fileDataArray.map(file => ({
+          ...file,
+          databaseId: notification.id
+        }));
+        
+        navigation.navigate('Results', {
+          notificationId: notification.id,
+          analysisResults: fileDataWithIds,
+        });
+      } catch (error) {
+        // Handle any errors during processing
+        console.error("Error processing notification data:", error);
+        
+        // Navigate with minimal data to avoid crashing
+        navigation.navigate('Results', {
+          notificationId: notification.id,
+          analysisResults: [{
+            fileName: notification.name || 'Unknown defect',
+            databaseId: notification.id,
+            detections: [{ class: 'Unknown', priority: notification.priority || 'Medium' }]
+          }],
+        });
+      }
     } else {
       navigation.navigate('DefectHistory', {
         notificationId: notification.id,
-        fileName: notification.name,
+        fileName: notification.name || notification.fileName,
       });
     }
   };
@@ -213,7 +283,7 @@ export default function NotificationsSection() {
                 </View>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => removeNotification(notification.id)}
+                  onPress={() => handleDeleteNotification(notification)}
                 >
                   <AntDesign name="close" size={20} color="black" />
                 </TouchableOpacity>
