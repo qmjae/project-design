@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Alert, Dimensions } from 'react-native';
+import { View, Alert, Dimensions, Text } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import { HeaderResults } from '../components/results/HeaderResults';
@@ -16,9 +16,12 @@ const PAGE_PADDING = 16;
 
 export default function ResultsScreen({ route }) {
   const navigation = useNavigation();
-  const { notificationId, analysisResults } = route.params;
+  const { notificationId, analysisResults = [] } = route.params || {};
   const { updateNotificationType } = useGlobalContext();
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  
+  // Ensure analysisResults is always an array, even when undefined or null
+  const resultsData = Array.isArray(analysisResults) ? analysisResults : [];
 
   const handleBack = () => {
     Alert.alert(
@@ -43,6 +46,23 @@ export default function ResultsScreen({ route }) {
     );
   };
 
+  // Handle the case with no valid data
+  if (!resultsData.length) {
+    return (
+      <BackgroundWrapper>
+        <SafeAreaView style={globalStyles.safeArea}>
+          <View style={globalStyles.container}>
+            <HeaderResults onBack={() => navigation.navigate('Home')} />
+            <View style={styles.emptyState}>
+              <Text>No analysis results to display</Text>
+            </View>
+          </View>
+          <ActionButtons navigation={navigation} currentScreen="Analysis" />
+        </SafeAreaView>
+      </BackgroundWrapper>
+    );
+  }
+
   return (
     <BackgroundWrapper>
       <SafeAreaView style={globalStyles.safeArea}>
@@ -52,7 +72,7 @@ export default function ResultsScreen({ route }) {
             <Carousel
               loop={false}
               width={PAGE_WIDTH}
-              data={analysisResults}
+              data={resultsData}
               onSnapToItem={(index) => setCurrentIndex(index)}
               renderItem={({ item }) => (
                 <View style={styles.cardWrapper}>
@@ -73,7 +93,7 @@ export default function ResultsScreen({ route }) {
             />
           </View>
           <PaginationDots
-            totalDots={analysisResults.length}
+            totalDots={resultsData.length}
             activeIndex={currentIndex}
           />
         </View>
@@ -94,5 +114,10 @@ const styles = {
     width: PAGE_WIDTH,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 };

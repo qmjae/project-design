@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "339813138081",
+    "project_id": "adlaw-application",
+    "storage_bucket": "adlaw-application.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:339813138081:android:6031957923f8696f853ae0",
+        "android_client_info": {
+          "package_name": "com.qmjae.solapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOf3RggUvzmKLAG_AQsJAu-eeHI3wKqZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
