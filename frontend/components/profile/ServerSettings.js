@@ -6,11 +6,9 @@ import { globalStyles, colors, shadows, spacing, fontSizes, borderRadius } from 
 
 const ServerSettings = () => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [config, setConfig] = useState({
-    BACKEND_API_URL: '',
-    CAMERA_URL: '',
-    SNAPSHOT_API_URL: ''
-  });
+  const [ipAddress, setIpAddress] = useState('');
+  const [backendPort, setBackendPort] = useState('');
+  const [cameraPort, setCameraPort] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,8 +18,10 @@ const ServerSettings = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const loadedConfig = await loadConfig();
-      setConfig(loadedConfig);
+      const config = await loadConfig();
+      setIpAddress(config.SERVER_IP || '');
+      setBackendPort(config.BACKEND_PORT?.toString() || '');
+      setCameraPort(config.CAMERA_PORT?.toString() || '');
     } catch (error) {
       Alert.alert('Error', 'Failed to load settings');
       console.error(error);
@@ -31,17 +31,30 @@ const ServerSettings = () => {
   };
 
   const handleSaveSettings = async () => {
-    try {
-      // Validate URLs
-      if (!isValidUrl(config.BACKEND_API_URL) || 
-          !isValidUrl(config.CAMERA_URL) || 
-          !isValidUrl(config.SNAPSHOT_API_URL)) {
-        Alert.alert('Error', 'Please enter valid URLs');
-        return;
-      }
+    if (!isValidIP(ipAddress)) {
+      Alert.alert('Invalid IP', 'Please enter a valid IP address');
+      return;
+    }
 
-      await saveConfig(config);
-      updateConfigValues(config);
+    if (!backendPort || isNaN(backendPort)) {
+      Alert.alert('Invalid Port', 'Please enter a valid Backend Port');
+      return;
+    }
+
+    if (!cameraPort || isNaN(cameraPort)) {
+      Alert.alert('Invalid Port', 'Please enter a valid Camera Port');
+      return;
+    }
+
+    const newConfig = {
+      SERVER_IP: ipAddress,
+      BACKEND_PORT: Number(backendPort),
+      CAMERA_PORT: Number(cameraPort),
+    };
+
+    try {
+      await saveConfig(newConfig);
+      updateConfigValues({ ...newConfig }); // updateConfigValues will rebuild URLs from these
       Alert.alert('Success', 'Settings saved successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to save settings');
@@ -51,10 +64,11 @@ const ServerSettings = () => {
 
   const handleReset = async () => {
     try {
-      // Pass an empty object to reset to defaults
       await saveConfig({});
       const defaultConfig = await loadConfig();
-      setConfig(defaultConfig);
+      setIpAddress(defaultConfig.SERVER_IP || '');
+      setBackendPort(defaultConfig.BACKEND_PORT?.toString() || '');
+      setCameraPort(defaultConfig.CAMERA_PORT?.toString() || '');
       updateConfigValues(defaultConfig);
       Alert.alert('Success', 'Settings reset to defaults');
     } catch (error) {
@@ -63,25 +77,21 @@ const ServerSettings = () => {
     }
   };
 
-  const isValidUrl = (urlString) => {
-    try {
-      new URL(urlString);
-      return true;
-    } catch (e) {
-      return false;
-    }
+  const isValidIP = (ip) => {
+    const regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){2}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+    return regex.test(ip);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.header}
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <Text style={styles.title}>Server Settings</Text>
-        <Ionicons 
-          name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'} 
-          size={24} 
+        <Ionicons
+          name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'}
+          size={24}
           color={colors.text.dark}
         />
       </TouchableOpacity>
@@ -89,48 +99,49 @@ const ServerSettings = () => {
       {isExpanded && (
         <ScrollView style={styles.content}>
           <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Backend API URL</Text>
+            <Text style={styles.settingLabel}>Server IP</Text>
             <TextInput
               style={[globalStyles.input, styles.input]}
-              value={config.BACKEND_API_URL}
-              onChangeText={(text) => setConfig({...config, BACKEND_API_URL: text})}
-              placeholder="Backend API URL"
+              value={ipAddress}
+              onChangeText={setIpAddress}
+              placeholder="e.g. 192.168.1.10"
               autoCapitalize="none"
+              keyboardType="numeric"
             />
           </View>
 
           <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Camera URL</Text>
+            <Text style={styles.settingLabel}>Backend Port</Text>
             <TextInput
               style={[globalStyles.input, styles.input]}
-              value={config.CAMERA_URL}
-              onChangeText={(text) => setConfig({...config, CAMERA_URL: text})}
-              placeholder="Camera URL"
-              autoCapitalize="none"
+              value={backendPort}
+              onChangeText={setBackendPort}
+              placeholder="e.g. 8000"
+              keyboardType="numeric"
             />
           </View>
 
           <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Snapshot API URL</Text>
+            <Text style={styles.settingLabel}>Camera Port</Text>
             <TextInput
               style={[globalStyles.input, styles.input]}
-              value={config.SNAPSHOT_API_URL}
-              onChangeText={(text) => setConfig({...config, SNAPSHOT_API_URL: text})}
-              placeholder="Snapshot API URL"
-              autoCapitalize="none"
+              value={cameraPort}
+              onChangeText={setCameraPort}
+              placeholder="e.g. 5000"
+              keyboardType="numeric"
             />
           </View>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={[globalStyles.buttonPrimary, styles.saveButton]} 
+            <TouchableOpacity
+              style={[globalStyles.buttonPrimary, styles.saveButton]}
               onPress={handleSaveSettings}
             >
               <Text style={globalStyles.buttonText}>Save Settings</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[globalStyles.buttonSecondary, styles.resetButton]} 
+
+            <TouchableOpacity
+              style={[globalStyles.buttonSecondary, styles.resetButton]}
               onPress={handleReset}
             >
               <Text style={globalStyles.buttonTextSecondary}>Reset to Default</Text>
@@ -155,8 +166,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: spacing.m,
-    // borderBottomWidth: isExpanded => isExpanded ? 1 : 0,
-    // borderBottomColor: colors.border,
   },
   title: {
     fontSize: fontSizes.l,
@@ -191,7 +200,7 @@ const styles = StyleSheet.create({
   resetButton: {
     flex: 1,
     marginLeft: spacing.xs,
-  }
+  },
 });
 
 export default ServerSettings;

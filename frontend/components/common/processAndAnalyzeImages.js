@@ -30,8 +30,15 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
         name: file.name,
       });
 
-      // Classify first
-      const classifyResponse = await tryFetch(`${BACKEND_API_URL}/classify/`, formData);
+      // Classify first with fallback
+      let classifyResponse;
+      try {
+        classifyResponse = await tryFetch(`${BACKEND_API_URL}/classify/`, formData);
+      } catch (primaryError) {
+        console.warn(`Primary classification server failed: ${primaryError.message}`);
+        classifyResponse = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/classify/', formData);
+      }
+
       const imageClass = classifyResponse.prediction || classifyResponse.label;
       console.log("Classification Result:", imageClass);
 

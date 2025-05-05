@@ -1,20 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { globalStyles, colors } from '../../styles/globalStyles';
 
-export function HeaderNotification({ onBack, title = 'Notifications', showBackButton = false }) {
+export function HeaderNotification({ title = 'Notifications' }) {
   return (
     <View style={styles.header}>
       <View style={styles.headerContent}>
-        {showBackButton && (
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={onBack}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text.dark} />
-          </TouchableOpacity>
-        )}
         <Text style={styles.title}>{title}</Text>
       </View>
     </View>

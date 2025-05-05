@@ -1,9 +1,8 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-export const HeaderAnalysis = ({ onBack }) => (
+export const HeaderAnalysis = ({ }) => (
   <SafeAreaView>
     <View style={styles.header}>
     <View style={styles.headerTitleContainer}>
@@ -35,4 +34,4 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       color: '#FFD700',
     },
-  });
+});
