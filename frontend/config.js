@@ -5,8 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const defaultIP = "192.168.1.10";
 const defaultPorts = {
   backend: "8000",
-  camera: "5000",
-  snapshot: "5000"
+  camera: "5000"
 };
 
 // Constructed URLs based on IP and ports
@@ -14,11 +13,10 @@ const defaultConfig = {
   SERVER_IP: defaultIP,
   BACKEND_PORT: defaultPorts.backend,
   CAMERA_PORT: defaultPorts.camera,
-  SNAPSHOT_PORT: defaultPorts.snapshot,
 
   BACKEND_API_URL: buildURL(defaultIP, defaultPorts.backend),
   CAMERA_URL: buildURL(defaultIP, defaultPorts.camera, '/camera'),
-  SNAPSHOT_API_URL: buildURL(defaultIP, defaultPorts.snapshot, '/snapshot')
+  SNAPSHOT_API_URL: buildURL(defaultIP, defaultPorts.camera, '/snapshot')
 };
 
 // Key for AsyncStorage
@@ -38,17 +36,15 @@ export const loadConfig = async () => {
     const ip = parsed.SERVER_IP || defaultIP;
     const backendPort = parsed.BACKEND_PORT || defaultPorts.backend;
     const cameraPort = parsed.CAMERA_PORT || defaultPorts.camera;
-    const snapshotPort = parsed.SNAPSHOT_PORT || defaultPorts.snapshot;
 
     return {
       SERVER_IP: ip,
       BACKEND_PORT: backendPort,
       CAMERA_PORT: cameraPort,
-      SNAPSHOT_PORT: snapshotPort,
 
       BACKEND_API_URL: buildURL(ip, backendPort),
       CAMERA_URL: buildURL(ip, cameraPort, '/camera'),
-      SNAPSHOT_API_URL: buildURL(ip, snapshotPort, '/snapshot')
+      SNAPSHOT_API_URL: buildURL(ip, cameraPort, '/snapshot')
     };
   } catch (error) {
     console.error('Failed to load configuration:', error);
@@ -63,7 +59,6 @@ export const saveConfig = async (config) => {
       SERVER_IP: config.SERVER_IP,
       BACKEND_PORT: config.BACKEND_PORT,
       CAMERA_PORT: config.CAMERA_PORT,
-      SNAPSHOT_PORT: config.SNAPSHOT_PORT
     };
     await AsyncStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(toSave));
     return true;
@@ -83,9 +78,8 @@ export const updateConfigValues = (config) => {
   const ip = config.SERVER_IP;
   const backendPort = config.BACKEND_PORT;
   const cameraPort = config.CAMERA_PORT;
-  const snapshotPort = config.SNAPSHOT_PORT;
 
   BACKEND_API_URL = buildURL(ip, backendPort);
   CAMERA_URL = buildURL(ip, cameraPort, '/camera');
-  SNAPSHOT_API_URL = buildURL(ip, snapshotPort, '/snapshot');
+  SNAPSHOT_API_URL = buildURL(ip, cameraPort, '/snapshot');
 };

@@ -38,5 +38,9 @@ yarn-error.*
 # venv
 venv/
 
+# python
+__pycache__/
+*.pyc
+
 
 .idea/

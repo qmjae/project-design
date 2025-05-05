@@ -69,11 +69,9 @@ const generateThermalHTML = (CAMERA_API_URL, SNAPSHOT_API_URL) => `
       try {
         const frame = document.getElementById('frame');
         const loading = document.getElementById('loading');
-        
-        // First, let's try to fetch the content with the headers
+
         const response = await fetch('${CAMERA_API_URL}', {
           headers: {
-            'ngrok-skip-browser-warning': 'true',
             'User-Agent': 'Mozilla/5.0'
           }
         });
@@ -85,9 +83,9 @@ const generateThermalHTML = (CAMERA_API_URL, SNAPSHOT_API_URL) => `
             loading.style.display = 'none';
             window.ReactNativeWebView.postMessage(JSON.stringify({ event: 'loaded' }));
           };
-          
+
           // Create a URL with header parameters to bypass ngrok warning
-          frame.src = '${CAMERA_API_URL}?ngrok-skip-browser-warning=69420';
+          frame.src = '${CAMERA_API_URL}?';
         } else {
           throw new Error('Failed to load camera feed');
         }
