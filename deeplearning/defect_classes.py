@@ -14,7 +14,7 @@ DEFECT_CLASSES = {
     #DONE
     "short-circuit": DefectInfo(
         className="Short Circuit",
-        stressFactors=["Thermal Cycling", "Mechanical Load"],
+        stressFactors=["Thermal Cycling", "Mechanical Load"], #TSANAKAS
         severityLevel="9 - Hazardous",
         powerLoss="No energy output",
         category="IEC TS 62446-3: Strings and modules",
@@ -40,9 +40,9 @@ DEFECT_CLASSES = {
     #DONE
     "substring": DefectInfo(
         className="Bypass Diode Failure",
-        stressFactors=["Electrical"], #DONE
+        stressFactors=["Electrical"], #DONE #TSANAKAS
         severityLevel="7 - High", #DONE
-        powerLoss="No power output", #DONE 
+        powerLoss="Reduced/No power output", #DONE 
         category="IEC TS 62446-3:  Substrings within module", #DONE
         CoA="2: thermal abnormality – tA", #DONE
         description="Assessable by thermal pattern and classified as  a extended area abnormality.  At one or more substrings, easily mistaken for cell breakage or cell defects, Potential induced degradation (PID) or mismatch.", #DONE
@@ -53,7 +53,7 @@ DEFECT_CLASSES = {
     #DONE
         "single-cell": DefectInfo(
         className="Single Cell",
-        stressFactors=["Temperature", "UV"], #DONE
+        stressFactors=["Temperature", "UV"], #DONE #TSANAKAS
         severityLevel="7 - High", #DONE
         powerLoss="High", #DONE
         category="IEC TS 62446-3:  Local abnormalities", #DONE
