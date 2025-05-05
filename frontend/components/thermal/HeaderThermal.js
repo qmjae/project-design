@@ -7,9 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 export const HeaderThermal = ({ title = "Thermal Camera", showBackButton = false, onBack }) => {
   const navigation = useNavigation();
 
-  const handleTestNavigation = () => {
-    navigation.navigate('ThermalTest');
-  };
+
 
   return (
     <SafeAreaView>
@@ -22,12 +20,6 @@ export const HeaderThermal = ({ title = "Thermal Camera", showBackButton = false
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>{title}</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.testButton} 
-          onPress={handleTestNavigation}
-        >
-          <Ionicons name="flask-outline" size={24} color="#FFD700" />
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
