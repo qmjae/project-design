@@ -7,6 +7,8 @@ import logging
 import io
 import time
 from defect_classes import get_defect_info
+import torch
+import torchvision.transforms as transforms
 
 
 # Configure logging
@@ -39,6 +41,24 @@ try:
 except Exception as e:
     logger.error(f"Error loading model: {e}")
     model = None
+
+# Load classification model
+try:
+    clf_model = torch.load("model/model.pt", map_location=torch.device("cpu"))
+    clf_model.eval()
+    logger.info("Classification model loaded successfully")
+except Exception as e:
+    logger.error(f"Error loading classification model: {e}")
+    clf_model = None
+
+# Define class labels in the same order as used in training
+clf_classes = ["Not-Solar", "Not-Thermal", "SolarThermal"]
+
+# Image transform for classification
+clf_transform = transforms.Compose([
+    transforms.Resize((128, 128)),
+    transforms.ToTensor()
+])
 
 @app.get("/")
 def read_root():
@@ -169,6 +189,56 @@ async def get_defect_details(class_name: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
+        )
+
+@app.post("/classify/")
+async def classify_image(file: UploadFile = File(...)):
+    start_time = time.time()
+
+    if not file:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file uploaded"
+        )
+
+    try:
+        if file.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid file type"
+            )
+
+        if clf_model is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Classification model not loaded"
+            )
+
+        image_data = await file.read()
+        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        input_tensor = clf_transform(image).unsqueeze(0)  # Add batch dimension
+
+        with torch.no_grad():
+            outputs = clf_model(input_tensor)
+            probs = torch.softmax(outputs, dim=1)
+            confidence, predicted = torch.max(probs, 1)
+
+        return {
+            "status": "success",
+            "processing_time": f"{time.time() - start_time:.2f}s",
+            "prediction": clf_classes[predicted.item()],
+            "confidence": round(confidence.item() * 100, 2)
+        }
+
+    except Exception as e:
+        logger.error(f"Error in classify_image: {e}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "detail": str(e),
+                "processing_time": f"{time.time() - start_time:.2f}s"
+            }
         )
 
 @app.get("/health")

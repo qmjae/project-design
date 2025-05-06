@@ -2,53 +2,38 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export const ModuleInfo = ({ defectName, containsSolarPanel = true, message }) => {
-  // Check if this is a "no solar panel" message, regardless of how it was passed
-  const isNoSolarPanelMessage = 
-    containsSolarPanel === false || 
-    (message && message.toLowerCase().includes('no solar panel'));
-  
-  // Special case: No solar panel detected
-  if (isNoSolarPanelMessage) {
+export const ModuleInfo = ({ defectName, imageClass }) => {
+  // Special case: No solar panel detected (Yellow alert)
+  if (imageClass === "Not-Solar") {
     return (
-      <View style={[styles.moduleInfo, styles.errorContainer]}>
-        <View style={styles.errorHeader}>
-          <Ionicons name="alert-circle" size={24} color="#FF6B6B" />
-          <Text style={[styles.moduleTitle, styles.errorTitle]}>No solar panel detected</Text>
+      <View style={[styles.moduleInfo, styles.warningContainer]}>
+        <View style={styles.warningHeader}>
+          <Ionicons name="alert-circle" size={24} color="#FFD000" />
+          <Text style={[styles.moduleTitle, styles.warningTitle]}>No solar panel detected</Text>
         </View>
-        <Text style={styles.errorMessage}>
+        <Text style={styles.warningMessage}>
           This image does not appear to contain a solar panel. Please upload an image of a solar panel for defect detection.
         </Text>
       </View>
     );
   }
 
-    // // Special case: No solar panel detected
-    // if (isNoSolarPanelMessage) {
-    //   return (
-    //     <View style={[styles.moduleInfo, styles.infoContainer]}>
-    //       <View style={styles.infoHeader}>
-    //         <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
-    //         <Text style={[styles.moduleTitle, styles.infoTitle]}>No defects detected</Text>
-    //       </View>
-    //       <Text style={styles.infoMessage}>
-    //       This solar panel appears to be functioning normally with no visible defects.
-    //       </Text>
-    //     </View>
-    //   );
-    // }
-  
-  // If a specific message is provided for other cases, use that
-  if (message) {
+  // Special case: Not a thermal image (Red alert)
+  if (imageClass === "Not-Thermal") {
     return (
-      <View style={styles.moduleInfo}>
-        <Text style={styles.moduleTitle}>{message}</Text>
-        <Text style={styles.moduleSubtitle}>(crystalline Si)</Text>
+      <View style={[styles.moduleInfo, styles.errorContainer]}>
+        <View style={styles.errorHeader}>
+          <Ionicons name="alert-circle" size={24} color="#FF6B6B" />
+          <Text style={[styles.moduleTitle, styles.errorTitle]}>Not a thermal image</Text>
+        </View>
+        <Text style={styles.errorMessage}>
+          This is not a thermal image. Please upload a thermal image for defect detection.
+        </Text>
       </View>
     );
   }
-  
-  // If it's a solar panel with no defects detected
+
+  // Special case: No defects detected (Green alert)
   if (!defectName || defectName.toLowerCase().includes('no defect')) {
     return (
       <View style={[styles.moduleInfo, styles.infoContainer]}>
@@ -63,12 +48,14 @@ export const ModuleInfo = ({ defectName, containsSolarPanel = true, message }) =
       </View>
     );
   }
-  
+
   // Default: It's a solar panel with a detected defect
   return (
     <View style={styles.moduleInfo}>
       <Text style={styles.moduleTitle}>
-        {defectName.charAt(0).toUpperCase() + defectName.slice(1).replace(/-/g, ' ')}
+        {defectName
+          ? defectName.charAt(0).toUpperCase() + defectName.slice(1).replace(/-/g, ' ')
+          : 'No defect'}
       </Text>
       <Text style={styles.moduleSubtitle}>(crystalline Si)</Text>
     </View>
@@ -89,6 +76,27 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
     marginTop: 5,
+  },
+  warningContainer: {
+    backgroundColor: '#FFFCE6',
+    padding: 15,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFD000',
+  },
+  warningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  warningTitle: {
+    marginLeft: 8,
+    color: '#FFD000',
+  },
+  warningMessage: {
+    fontSize: 14,
+    color: '#555',
+    lineHeight: 20,
   },
   errorContainer: {
     backgroundColor: '#FFF5F5',
