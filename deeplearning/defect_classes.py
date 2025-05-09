@@ -38,19 +38,6 @@ DEFECT_CLASSES = {
         ]
     ),
     #DONE
-    "substring": DefectInfo(
-        className="Bypass Diode Failure",
-        stressFactors=["Electrical"], #DONE #TSANAKAS
-        severityLevel="7 - High", #DONE
-        powerLoss="Reduced/No power output", #DONE 
-        category="IEC TS 62446-3:  Substrings within module", #DONE
-        CoA="2: thermal abnormality – tA", #DONE
-        description="Assessable by thermal pattern and classified as  a extended area abnormality.  At one or more substrings, easily mistaken for cell breakage or cell defects, Potential induced degradation (PID) or mismatch.", #DONE
-        recommendations=[
-            "Check module and bypass diodes for proper function under reverse biasing.", #DONE
-        ]
-    ),
-    #DONE
         "single-cell": DefectInfo(
         className="Single Cell",
         stressFactors=["Temperature", "UV"], #DONE #TSANAKAS

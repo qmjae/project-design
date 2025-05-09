@@ -12,14 +12,29 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
     const uploadedFilesData = await uploadFilesToAppwrite(images);
     console.log('Uploaded Files Data:', uploadedFilesData);
 
-    const tryFetch = async (url, formData) => {
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      if (!response.ok) throw new Error(`Fetch failed with status: ${response.status}`);
-      return response.json();
+    const tryFetch = async (url, formData, timeout = 10000) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal,
+          // Do NOT set Content-Type manually when using FormData
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Fetch failed with status: ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
     };
 
     const analysisResults = await Promise.all(images.map(async (file, index) => {
@@ -35,8 +50,8 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
       try {
         classifyResponse = await tryFetch(`${BACKEND_API_URL}/classify/`, formData);
       } catch (primaryError) {
-        console.warn(`Primary classification server failed: ${primaryError.message}`);
-        classifyResponse = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/classify/', formData);
+        console.warn(`Classification server failed: ${primaryError.message}`);
+        throw primaryError;
       }
 
       const imageClass = classifyResponse.prediction || classifyResponse.label;
@@ -57,8 +72,8 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
       try {
         result = await tryFetch(`${BACKEND_API_URL}/detect/`, formData);
       } catch (primaryError) {
-        console.warn(`Primary server failed: ${primaryError.message}`);
-        result = await tryFetch('https://yeti-fleet-distinctly.ngrok-free.app/detect/', formData);
+        console.warn(`Detection server failed: ${primaryError.message}`);
+        throw primaryError;
       }
 
       return {
