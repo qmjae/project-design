@@ -78,8 +78,12 @@ const ServerSettings = () => {
   };
 
   const isValidIP = (ip) => {
-    const regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){2}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
-    return regex.test(ip);
+    try {
+      const url = new URL(ip);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
   };
 
   return (
@@ -99,14 +103,14 @@ const ServerSettings = () => {
       {isExpanded && (
         <ScrollView style={styles.content}>
           <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Server IP</Text>
+            <Text style={styles.settingLabel}>Server URL</Text>
             <TextInput
               style={[globalStyles.input, styles.input]}
               value={ipAddress}
               onChangeText={setIpAddress}
-              placeholder="e.g. 192.168.1.10"
+              placeholder="e.g. http://192.168.1.10"
               autoCapitalize="none"
-              keyboardType="numeric"
+              keyboardType="url"
             />
           </View>
 

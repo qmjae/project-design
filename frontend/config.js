@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Default IP and ports
-const defaultIP = "192.168.1.10";
+const defaultIP = "http://192.168.1.10";
 const defaultPorts = {
   backend: "8000",
   camera: "5000"
@@ -24,7 +24,7 @@ export const CONFIG_STORAGE_KEY = 'appConfig';
 
 // Build URL using IP, port, and optional path
 function buildURL(ip, port, path = '') {
-  return `http://${ip}:${port}${path}`;
+  return `${ip}:${port}${path}`;
 }
 
 // Load config from AsyncStorage
