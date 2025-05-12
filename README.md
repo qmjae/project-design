@@ -52,7 +52,7 @@ To start ngrok, run:
 ```
 choco install ngrok
 ngrok config add-authtoken <TOKEN>
-ngrok http --url=yeti-fleet-distinctly.ngrok-free.app 8000
+ngrok http --url=<random-url>.ngrok-free.app 8000
 ```
 If ngrok won't run, change DNS to:
 ```
