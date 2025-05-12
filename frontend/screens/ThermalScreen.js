@@ -168,12 +168,14 @@ const ThermalScreen = ({ navigation }) => {
               style={[styles.toggleButton, snapshotMode === 'analyze' && styles.toggleButtonActive]}
               onPress={() => setSnapshotMode('analyze')}
             >
+              <Ionicons name="analytics-outline" size={20} color={snapshotMode === 'analyze' ? '#FFFFFF' : colors.text.light} style={styles.toggleButtonIcon} />
               <Text style={[styles.toggleButtonText, snapshotMode === 'analyze' && styles.toggleButtonTextActive]}>Analyze Immediately</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.toggleButton, snapshotMode === 'save' && styles.toggleButtonActive]}
               onPress={() => setSnapshotMode('save')}
             >
+              <Ionicons name="save-outline" size={20} color={snapshotMode === 'save' ? '#FFFFFF' : colors.text.light} style={styles.toggleButtonIcon} />
               <Text style={[styles.toggleButtonText, snapshotMode === 'save' && styles.toggleButtonTextActive]}>Save to Gallery</Text>
             </TouchableOpacity>
           </View>
@@ -228,6 +230,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleButton: {
+    flexDirection: 'row', // Added to align icon and text
+    alignItems: 'center', // Added to align icon and text
     paddingVertical: 10,
     paddingHorizontal: 15,
     backgroundColor: colors.background.dark,
@@ -239,11 +243,14 @@ const styles = StyleSheet.create({
   toggleButtonActive: {
     backgroundColor: colors.primary,
   },
+  toggleButtonIcon: { // Added for icon styling
+    marginRight: 8,
+  },
   toggleButtonText: {
     color: colors.text.light,
     fontWeight: 'bold',
   },
   toggleButtonTextActive: {
-    color: colors.white,
+    color: '#FFFFFF', // Explicitly set active text color to true white
   },
 });
