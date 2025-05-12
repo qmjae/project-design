@@ -12,7 +12,7 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
     const uploadedFilesData = await uploadFilesToAppwrite(images);
     console.log('Uploaded Files Data:', uploadedFilesData);
 
-    const tryFetch = async (url, formData, timeout = 10000) => {
+    const tryFetch = async (url, formData, timeout = 30000) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -89,12 +89,20 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
 
     console.log('Final analysis results:', analysisResults);
 
-    const savedNotifications = await Promise.all(analysisResults.map(async result => {
+    // Augment analysisResults with databaseId and prepare notifications
+    const augmentedAnalysisResults = [];
+    const notificationsToCreate = [];
+    let primaryNotificationId = undefined; // To store the ID of the first detected defect notification
+
+    for (const result of analysisResults) {
+      let notification;
+      let augmentedResult = { ...result }; // Start with the original result
+
       if (result.skipAnalysis) {
         const reason = result.imageClass === "Not-Solar"
           ? "No solar panel detected."
           : "This is not a thermal image.";
-        return {
+        notification = {
           id: `skip-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           type: 'Warning',
           priority: 'Medium',
@@ -103,46 +111,59 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
           message: `Image skipped. ${reason}`,
           file: [{ fileName: result.fileName, imageUri: result.imageUri, detections: [] }]
         };
-      }
-
-      if (result.detections?.length > 0) {
+      } else if (result.detections?.length > 0) {
         try {
           const savedDoc = await saveDefectResult(user.$id, result);
-          return {
-            id: savedDoc.$id,
+          augmentedResult.databaseId = savedDoc.$id; // Augment with databaseId
+          augmentedResult.status = savedDoc.status; // Carry over the status from Appwrite doc
+          notification = {
+            id: savedDoc.$id, // This is the notificationId for this specific defect
             type: 'Detected',
+            status: savedDoc.status, // Add status here for the initial notification object
             priority: result.detections[0].priority.match(/^(\d+)/)?.[0] || 'Medium',
             datetime: new Date().toISOString(),
             name: result.fileName,
-            file: [result],
+            file: [augmentedResult], // Use augmented result
           };
+          if (!primaryNotificationId) {
+            primaryNotificationId = savedDoc.$id; // Capture the first detected defect's ID
+          }
         } catch (err) {
           console.error('Error saving result:', err);
-          return null;
+          notification = null; // Or handle error appropriately
         }
+      } else {
+        notification = {
+          id: `no-defect-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          type: 'Info',
+          priority: 'Low',
+          datetime: new Date().toISOString(),
+          name: result.fileName,
+          message: 'No defects detected on this solar panel',
+          file: [{
+            fileName: result.fileName,
+            imageUri: result.imageUri,
+            detections: [{ class: 'No defect', priority: 'Low' }]
+          }],
+          skipNotification: true
+        };
       }
 
-      return {
-        id: `no-defect-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        type: 'Info',
-        priority: 'Low',
-        datetime: new Date().toISOString(),
-        name: result.fileName,
-        message: 'No defects detected on this solar panel',
-        file: [{
-          fileName: result.fileName,
-          imageUri: result.imageUri,
-          detections: [{ class: 'No defect', priority: 'Low' }]
-        }],
-        skipNotification: true
-      };
-    }));
+      augmentedAnalysisResults.push(augmentedResult);
+      if (notification) {
+        notificationsToCreate.push(notification);
+      }
+    }
 
-    savedNotifications
+    notificationsToCreate
       .filter(n => n && !n.skipNotification)
       .forEach(addNotification);
 
-    navigation.navigate('Results', { files: images, analysisResults });
+    console.log('Navigating to Results with notificationId:', primaryNotificationId, 'and analysisResults:', augmentedAnalysisResults);
+    navigation.navigate('Results', { 
+      analysisResults: augmentedAnalysisResults, 
+      notificationId: primaryNotificationId 
+    });
 
   } catch (err) {
     console.error('Processing error:', err);

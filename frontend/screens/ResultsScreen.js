@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react'; // Added useEffect, useState
 import { View, Alert, Dimensions, Text } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
@@ -17,34 +17,42 @@ const PAGE_PADDING = 16;
 export default function ResultsScreen({ route }) {
   const navigation = useNavigation();
   const { notificationId, analysisResults = [] } = route.params || {};
-  const { updateNotificationType } = useGlobalContext();
+  const { updateNotificationType, notifications } = useGlobalContext(); // Get notifications from context
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  
-  // Ensure analysisResults is always an array, even when undefined or null
+  const [isResolvedOnScreen, setIsResolvedOnScreen] = useState(false);
+
   const resultsData = Array.isArray(analysisResults) ? analysisResults : [];
 
-  const handleBack = () => {
-    Alert.alert(
-      "Leave Results",
-      "Are you sure? Only resolved results will be saved.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Leave",
-          style: "destructive",
-          onPress: () => {
-            if (notificationId) {
-              updateNotificationType(notificationId, 'Unresolved');
-            }
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Home' }],
-            });
-          }
+  useEffect(() => {
+    // Find the specific notification when the component mounts or relevant params change
+    const currentNotificationFromParams = notifications.find(n => n.id === notificationId);
+
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      console.log('ResultsScreen: blur event. isResolvedOnScreen:', isResolvedOnScreen, 'notificationId:', notificationId);
+
+      // It's important to get the latest version of the notification list here if other operations could modify it.
+      // However, for the initial type/status and datetime, currentNotificationFromParams should be sufficient if it's found.
+      const notificationToProcess = notifications.find(n => n.id === notificationId) || currentNotificationFromParams;
+
+      if (!isResolvedOnScreen && notificationId && notificationToProcess) {
+        const isDetectedAndRecent = 
+          (notificationToProcess.status === 'pending' || notificationToProcess.type === 'Detected') &&
+          notificationToProcess.datetime &&
+          (new Date().getTime() - new Date(notificationToProcess.datetime).getTime()) < 60000; // 60 seconds
+
+        if (isDetectedAndRecent) {
+          console.log(`ResultsScreen: blur - Notification ${notificationId} is ${notificationToProcess.status || notificationToProcess.type} and recent. Not changing to Unresolved yet.`);
+          return; // Do nothing, let it stay as is (Detected/pending)
         }
-      ]
-    );
-  };
+
+        // If not recent and detected, or if it's some other status that should become Unresolved
+        console.log(`ResultsScreen: blur - Automatically updating ${notificationId} to Unresolved.`);
+        updateNotificationType(notificationId, 'Unresolved');
+      }
+    });
+
+    return unsubscribeBlur; // Cleanup the blur listener on unmount
+  }, [navigation, notificationId, isResolvedOnScreen, updateNotificationType, notifications]); // Add notifications to dependency array
 
   // Handle the case with no valid data
   if (!resultsData.length) {
@@ -68,7 +76,8 @@ export default function ResultsScreen({ route }) {
       <SafeAreaView style={globalStyles.safeArea}>
         <View style={globalStyles.container}>
           <View style={styles.cardsContainer}>
-            <HeaderResults onBack={handleBack} />
+            {/* Changed onBack to simple goBack, beforeRemove will handle the logic */}
+            <HeaderResults onBack={() => navigation.goBack()} />
             <Carousel
               loop={false}
               width={PAGE_WIDTH}
@@ -79,7 +88,9 @@ export default function ResultsScreen({ route }) {
                   <ResultCard
                     item={item}
                     width={PAGE_WIDTH - (PAGE_PADDING * 2)}
-                    notificationId={notificationId}
+                    // Pass the specific item's databaseId as notificationId to ResultCard
+                    notificationId={item.databaseId || notificationId}
+                    onResolve={() => setIsResolvedOnScreen(true)} // Callback to set isResolvedOnScreen
                   />
                 </View>
               )}

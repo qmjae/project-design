@@ -79,7 +79,10 @@ const GlobalProvider = ({ children }) => {
       let statusValue = 'pending'; // Default
       if (newType === 'Resolved') {
         statusValue = 'resolved';
+      } else if (newType === 'Unresolved') {
+        statusValue = 'unresolved'; // Or 'pending' if you prefer
       }
+      // Add other type mappings if necessary
       
       console.log(`Converting notification type "${newType}" to status "${statusValue}"`);
       
