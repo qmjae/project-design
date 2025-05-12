@@ -24,7 +24,16 @@ export const CONFIG_STORAGE_KEY = 'appConfig';
 
 // Build URL using IP, port, and optional path
 function buildURL(ip, port, path = '') {
-  return `${ip}:${port}${path}`;
+  // Remove trailing slash from ip if present for consistency
+  const cleanedIp = ip.endsWith('/') ? ip.slice(0, -1) : ip;
+
+  if (cleanedIp.includes('.ngrok-free.app') || cleanedIp.includes('.ngrok.io')) {
+    // For Ngrok URLs, the public URL already maps to the correct local port.
+    // The 'port' parameter here refers to the local port ngrok forwards to, not for the public URL.
+    return `${cleanedIp}${path}`;
+  }
+  // For direct IPs (e.g., local network), append the port.
+  return `${cleanedIp}:${port}${path}`;
 }
 
 // Load config from AsyncStorage
