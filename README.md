@@ -8,7 +8,7 @@ This is a mobile application for our design project called "Design of Defective 
 The general objective of the project is to design a defective module detection for  solar panel thermography analysis that fulfills the client's requirements while adhering to engineering standards and considering various constraints including economic, sustainability, environmental, safety, risk, public health, welfare, social, global, and cultural factors along with computation of trade-offs from multiple realistic constraints.
 
 Specifically, it aims to:
-1. Design a prototype that captures thermal images namely single cell, open-circuited PV module, short-circuited PV module, and bypass diode failure.
+1. Design a prototype that captures thermal images namely single cell, open-circuited PV module, and short-circuited PV module
 2. Develop a mobile application that:
 - Accepts user input from the system prototype, specifically thermal images of monocrystalline silicon solar panels.
 - Alerts users about detected defects and their severity levels.
