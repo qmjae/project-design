@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Svg, { Rect, LinearGradient, Defs, Stop } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
@@ -20,17 +20,20 @@ const getDisplayName = (className) => {
   return classNameMapping[className.toLowerCase()] || className;
 };
 
-const getNotificationType = (type, status) => {
-  // Check both type and status since data can come from different sources
+// Renamed and updated to handle more types and return label
+const getNotificationTypeAndStatus = (type, status) => {
   if (type === 'Resolved' || status === 'resolved') {
-    return ['#ffffff', '#009900'];
-  } else if (type === 'Detected' || status === 'pending') {
-    return ['#ffffff', '#990000'];
-  } else if (type === 'Unresolved') {
-    return ['#ffffff', '#FFCC00'];
-  } else {
-    return ['#ffffff', '#ccc'];
+    return { colors: ['#ffffff', '#009900'], statusLabel: 'Resolved' };
+  } else if (type === 'Unresolved' || status === 'unresolved') {
+    return { colors: ['#ffffff', '#FFCC00'], statusLabel: 'Unresolved' };
+  } else if (type === 'Detected' || type === 'Defect Detected' || status === 'pending') {
+    return { colors: ['#ffffff', '#990000'], statusLabel: 'Detected' };
+  } else if (type === 'Info') {
+    return { colors: ['#ffffff', '#007AFF'], statusLabel: 'Info' };
+  } else if (type === 'Warning') {
+    return { colors: ['#ffffff', '#FFA500'], statusLabel: 'Warning' };
   }
+  return { colors: ['#ffffff', '#ccc'], statusLabel: type || 'Unknown' };
 };
 
 const formatDate = (dateString) => {
@@ -38,7 +41,7 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-export default function NotificationsSection() {
+export default function NotificationsSection({ activeFilter }) {
   const navigation = useNavigation();
   const { notifications, removeNotification, dismissHistoryNotification, dismissedHistoryIds, user } = useGlobalContext();
   const [combinedNotifications, setCombinedNotifications] = useState([]);
@@ -50,43 +53,45 @@ export default function NotificationsSection() {
       try {
         setLoading(true);
         
-        // Only attempt to fetch if we have a user
         if (user && user.$id) {
-          // Get defect history from database
           const historyItems = await getDefectHistory(user.$id);
           
-          // Process history items to match notification format
           const historyNotifications = historyItems
-            // Filter out history items that have been dismissed
             .filter(item => !dismissedHistoryIds.includes(item.$id))
             .map(item => {
-              // Create a valid file array with proper structure
               const fileObject = {
                 fileName: item.fileName,
                 imageUrl: item.imageUrl,
                 detections: [{
                   class: item.defectClass,
                   priority: item.priority,
-                  // Add other fields that might be expected
                   description: item.description || ''
-                }]
+                }],
+                imageClass: item.imageClass,
+                message: item.message,
               };
               
+              let currentType = 'Detected';
+              if (item.status === 'resolved') {
+                currentType = 'Resolved';
+              } else if (item.status === 'unresolved') {
+                currentType = 'Unresolved';
+              } else if (item.status === 'pending') {
+                currentType = 'Detected';
+              }
+
               return {
                 id: item.$id,
-                type: item.status === 'resolved' ? 'Resolved' : 'Detected',
+                type: currentType,
                 name: item.fileName,
                 priority: item.priority,
                 datetime: formatDate(item.DateTime),
                 status: item.status,
-                // Always make file an array, even if it's just one item
                 file: [fileObject],
-                // Important flag to know if it's from history
                 isFromHistory: true
               };
             });
           
-          // Combine with local notifications, filtering out duplicates
           const localNotifIds = new Set(notifications.map(n => n.id));
           const uniqueHistoryItems = historyNotifications.filter(item => !localNotifIds.has(item.id));
           
@@ -104,21 +109,38 @@ export default function NotificationsSection() {
     };
     
     fetchAllNotifications();
-  }, [notifications, user, dismissedHistoryIds]); // Add dismissedHistoryIds as a dependency
+  }, [notifications, user, dismissedHistoryIds]);
 
-  // Updated handleDeleteNotification to handle both local and history notifications
+  const filteredNotifications = useMemo(() => {
+    if (!activeFilter) return combinedNotifications.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+    return combinedNotifications.filter(notif => {
+      let effectiveStatus = notif.status;
+      if (notif.type === 'Detected' || notif.type === 'Defect Detected') effectiveStatus = 'pending';
+      if (notif.type === 'Resolved') effectiveStatus = 'resolved';
+      if (notif.type === 'Unresolved') effectiveStatus = 'unresolved';
+      
+      if (activeFilter === 'Detected') {
+        return effectiveStatus === 'pending';
+      }
+      if (activeFilter === 'Unresolved') {
+        return effectiveStatus === 'unresolved';
+      }
+      if (activeFilter === 'Resolved') {
+        return effectiveStatus === 'resolved';
+      }
+      return true;
+    }).sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+  }, [combinedNotifications, activeFilter]);
+
   const handleDeleteNotification = async (notification) => {
     try {
       console.log("Deleting notification with ID:", notification.id);
       
-      // If it's a local notification, use the existing removeNotification function
       if (!notification.isFromHistory) {
         removeNotification(notification.id);
       } else {
-        // For history items, we mark them as dismissed
         dismissHistoryNotification(notification.id);
-        
-        // Also update our local state for immediate UI feedback
         setCombinedNotifications(prev => 
           prev.filter(item => item.id !== notification.id)
         );
@@ -129,95 +151,85 @@ export default function NotificationsSection() {
   };
 
   const handleNotification = (notification) => {
-    // Ensure we have a valid notification with an ID
     if (!notification || !notification.id) {
       console.error("Invalid notification: missing ID", notification);
       return;
     }
-    
-    // Log the notification structure for debugging
+
     console.log("Handling notification click:", {
       id: notification.id,
       type: notification.type,
       message: notification.message,
       fileData: notification.file
     });
-    
-    // Always pass the notification ID (which should be a valid database ID)
+
     if (notification.type !== 'Resolved') {
-      // Handle the file property which can be in different formats
       let fileDataArray = [];
-      
+      let isWarningNoSolarPanel = false;
+
       try {
         if (notification.file) {
-          // Make sure we have an array of file data
-          fileDataArray = Array.isArray(notification.file) ? 
-                         notification.file : 
+          fileDataArray = Array.isArray(notification.file) ?
+                         notification.file :
                          (typeof notification.file === 'object' ? [notification.file] : []);
           
-          // Important: If there's a custom message in the notification, add it to all file objects
           if (notification.message) {
+            isWarningNoSolarPanel = notification.message.toLowerCase().includes('no solar panel detected') || 
+                                    notification.message.toLowerCase().includes('not-solar');
+                                    
             fileDataArray = fileDataArray.map(file => ({
               ...file,
               message: notification.message,
-              // For "No solar panel" warnings, explicitly set containsSolarPanel to false
-              containsSolarPanel: notification.message && 
-                notification.message.toLowerCase().includes('no solar panel') ? false : true
+              imageClass: isWarningNoSolarPanel ? 'Not-Solar' : (file.imageClass || 'Unknown'),
+              containsSolarPanel: !isWarningNoSolarPanel,
+              detections: isWarningNoSolarPanel ? [] : (file.detections || []) 
             }));
           }
         } else if (notification.imageUrl) {
-          // Handle historical defects that don't use the file property
+          isWarningNoSolarPanel = notification.message && 
+                                  (notification.message.toLowerCase().includes('no solar panel detected') ||
+                                   notification.message.toLowerCase().includes('not-solar'));
           fileDataArray = [{
             fileName: notification.name || notification.fileName,
             imageUrl: notification.imageUrl,
-            message: notification.message, // Add the message if it exists
-            containsSolarPanel: !(notification.message && 
-              notification.message.toLowerCase().includes('no solar panel')),
-            detections: [{
+            message: notification.message,
+            imageClass: isWarningNoSolarPanel ? 'Not-Solar' : (notification.defectClass || 'Unknown'),
+            containsSolarPanel: !isWarningNoSolarPanel,
+            detections: isWarningNoSolarPanel ? [] : [{
               class: notification.defectClass,
               priority: notification.priority
             }]
           }];
         } else {
-          // Fallback for cases with minimal data
+          isWarningNoSolarPanel = notification.message && 
+                                  (notification.message.toLowerCase().includes('no solar panel detected') ||
+                                   notification.message.toLowerCase().includes('not-solar'));
           fileDataArray = [{
             fileName: notification.name || 'Unknown',
-            message: notification.message, // Add the message if it exists
-            containsSolarPanel: !(notification.message && 
-              notification.message.toLowerCase().includes('no solar panel')),
-            detections: [{ 
+            message: notification.message,
+            imageClass: isWarningNoSolarPanel ? 'Not-Solar' : 'Unknown',
+            containsSolarPanel: !isWarningNoSolarPanel,
+            detections: isWarningNoSolarPanel ? [] : [{
               class: 'Unknown',
               priority: notification.priority || 'Medium'
             }]
           }];
         }
         
-        // For each fileData item, attach the notification ID so ResultCard can access it
         const fileDataWithIds = fileDataArray.map(file => ({
           ...file,
-          databaseId: notification.id
+          databaseId: notification.id,
+          isNoSolarPanelWarning: isWarningNoSolarPanel 
         }));
         
         navigation.navigate('Results', {
-          notificationId: notification.id,
           analysisResults: fileDataWithIds,
-        });
-      } catch (error) {
-        // Handle any errors during processing
-        console.error("Error processing notification data:", error);
-        
-        // Navigate with minimal data to avoid crashing
-        navigation.navigate('Results', {
+          fromNotification: true,
           notificationId: notification.id,
-          analysisResults: [{
-            fileName: notification.name || 'Unknown defect',
-            databaseId: notification.id,
-            message: notification.message,
-            containsSolarPanel: !(notification.message && 
-              notification.message.toLowerCase().includes('no solar panel')),
-            detections: [{ class: 'Unknown', priority: notification.priority || 'Medium' }]
-          }],
         });
+
+      } catch (error) {
+        console.error("Error preparing data for Results screen:", error);
       }
     } else {
       navigation.navigate('DefectHistory', {
@@ -239,83 +251,86 @@ export default function NotificationsSection() {
   return (
     <View>
       <View style={styles.notificationBox}>
-        {combinedNotifications.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <View style={styles.emptyState}>
             <AntDesign name="notification" size={40} color="#ccc" />
-            <Text style={styles.emptyStateText}>No notifications yet</Text>
+            <Text style={styles.emptyStateText}>
+              {activeFilter ? `No notifications for "${activeFilter}"` : 'No notifications yet'}
+            </Text>
           </View>
         ) : (
           <ScrollView>
-            {combinedNotifications.map((notification) => (
-              <TouchableOpacity
-                key={notification.id}
-                style={styles.notificationItem}
-                onPress={() => handleNotification(notification)}
-              >
-                <Svg
-                  height="100%"
-                  width="100%"
-                  style={styles.gradientBackground}
-                >
-                  <Defs>
-                    <LinearGradient
-                      id={`grad-${notification.id}`}
-                      x1="0%" y1="0%" x2="75%" y2="0%"
-                    >
-                      <Stop
-                        offset="0%"
-                        stopColor={getNotificationType(notification.type, notification.status)[0]}
-                        stopOpacity="1"
-                      />
-                      <Stop
-                        offset="75%"
-                        stopColor={getNotificationType(notification.type, notification.status)[1]}
-                        stopOpacity="1"
-                      />
-                    </LinearGradient>
-                  </Defs>
-                  <Rect
-                    width="100%"
-                    height="100%"
-                    fill={`url(#grad-${notification.id})`}
-                    rx="10"
-                  />
-                </Svg>
-                <View style={styles.notificationContent}>
-                  <Text style={styles.notificationTitle}>
-                    {notification.message && notification.type === 'Info' 
-                      ? 'Panel Info' 
-                      : notification.message && notification.type === 'Warning'
-                        ? 'Warning'
-                        : `Defect ${notification.type}`}
-                  </Text>
-                  <Text style={styles.notificationDetails}>
-                    {notification.message ? (
-                      <Text style={styles.defectClassText}>{notification.message}{" "}</Text>
-                    ) : notification.file && notification.file[0]?.detections && 
-                      notification.file[0]?.detections[0]?.class && (
-                      <Text style={styles.defectClassText}>
-                        {getDisplayName(notification.file[0].detections[0].class)}{" "}
-                      </Text>
-                    )}
-                    {notification.priority && (
-                      <Text>
-                        Priority: <Text style={styles.priorityText}>{notification.priority}{" "}</Text>
-                      </Text>
-                    )}
-                    <Text style={styles.datetimeText}>
-                      {notification.datetime || formatDate(new Date())}
-                    </Text>
-                  </Text>
-                </View>
+            {filteredNotifications.map((notification) => {
+              const { colors: gradColors, statusLabel } = getNotificationTypeAndStatus(notification.type, notification.status);
+              return (
                 <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDeleteNotification(notification)}
+                  key={notification.id}
+                  style={styles.notificationItem}
+                  onPress={() => handleNotification(notification)}
                 >
-                  <AntDesign name="close" size={20} color="black" />
+                  <Svg
+                    height="100%"
+                    width="100%"
+                    style={styles.gradientBackground}
+                  >
+                    <Defs>
+                      <LinearGradient
+                        id={`grad-${notification.id}`}
+                        x1="0%" y1="0%" x2="75%" y2="0%"
+                      >
+                        <Stop
+                          offset="0%"
+                          stopColor={gradColors[0]}
+                          stopOpacity="1"
+                        />
+                        <Stop
+                          offset="75%"
+                          stopColor={gradColors[1]}
+                          stopOpacity="1"
+                        />
+                      </LinearGradient>
+                    </Defs>
+                    <Rect
+                      width="100%"
+                      height="100%"
+                      fill={`url(#grad-${notification.id})`}
+                      rx="10"
+                    />
+                  </Svg>
+                  <View style={styles.notificationContent}>
+                    <Text style={styles.notificationTitle}>
+                      {notification.message && (notification.type === 'Info' || notification.type === 'Warning')
+                        ? statusLabel 
+                        : `Defect ${statusLabel}`}
+                    </Text>
+                    <Text style={styles.notificationDetails}>
+                      {notification.message ? (
+                        <Text style={styles.defectClassText}>{notification.message}{" "}</Text>
+                      ) : notification.file && notification.file[0]?.detections && 
+                        notification.file[0]?.detections[0]?.class && (
+                        <Text style={styles.defectClassText}>
+                          {getDisplayName(notification.file[0].detections[0].class)}{" "}
+                        </Text>
+                      )}
+                      {notification.priority && (
+                        <Text>
+                          Priority: <Text style={styles.priorityText}>{notification.priority}{" "}</Text>
+                        </Text>
+                      )}
+                      <Text style={styles.datetimeText}>
+                        {notification.datetime || formatDate(new Date())}
+                      </Text>
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteNotification(notification)}
+                  >
+                    <AntDesign name="close" size={20} color="black" />
+                  </TouchableOpacity>
                 </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
+              );
+            })}
           </ScrollView>
         )}
       </View>

@@ -240,7 +240,7 @@ try {
   }
   
   // Check if status is valid (should be one of your enum values)
-  if (!['pending', 'resolved', 'total'].includes(status)) {
+  if (!['pending', 'resolved', 'unresolved', 'total'].includes(status)) { // Added 'unresolved'
     console.warn(`Warning: Status "${status}" might not match your enum values`);
   }
 

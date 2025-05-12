@@ -49,25 +49,36 @@ export default function DashboardSection() {
 
   // Calculate stats from notifications and database history
   const statsData = React.useMemo(() => {
-    // Combine notifications with defect history for more comprehensive data
-    const combinedData = [...notifications];
+    // Define types and statuses that represent actual defects
+    const actualDefectTypes = ['Detected', 'Resolved', 'Unresolved'];
+    // Statuses from Appwrite history are 'pending', 'resolved', 'unresolved'
+
+    // Filter global notifications to only include actual defects
+    const defectRelatedNotifications = notifications.filter(n => 
+      actualDefectTypes.includes(n.type) || // Check notification type
+      (n.status && ['pending', 'resolved', 'unresolved'].includes(n.status)) // Check status if present
+    );
+
+    const combinedData = [...defectRelatedNotifications];
     
     // Check if defectHistory exists before processing
     if (defectHistory && defectHistory.length > 0) {
       // Add items from defect history that aren't already in notifications
       defectHistory.forEach(historyItem => {
-        // Check if this defect is already in notifications
-        const exists = notifications.some(n => 
+        const exists = defectRelatedNotifications.some(n => 
           n.id === historyItem.$id
         );
         
         if (!exists) {
-          // Check for the status field using the correct enum values
-          const isResolved = historyItem.status === 'resolved';
+          // Map historyItem status to a notification-like type
+          let typeFromStatus = 'Detected'; // Default for 'pending'
+          if (historyItem.status === 'resolved') typeFromStatus = 'Resolved';
+          else if (historyItem.status === 'unresolved') typeFromStatus = 'Unresolved';
           
           combinedData.push({
             id: historyItem.$id,
-            type: isResolved ? 'Resolved' : 'Detected', // Use the enum status
+            type: typeFromStatus, 
+            status: historyItem.status, // Keep the original status
             datetime: historyItem.DateTime,
             priority: historyItem.priority,
             name: historyItem.fileName,
@@ -77,27 +88,28 @@ export default function DashboardSection() {
                 priority: historyItem.priority
               }],
               fileName: historyItem.fileName,
-              imageUrl: historyItem.imageUrl
-            }]
+              imageUrl: historyItem.imageUrl,
+              // Ensure message and imageClass are present if needed by downstream logic for history items
+              message: historyItem.message || '',
+              imageClass: historyItem.imageClass || 'Unknown' 
+            }],
+            isFromHistory: true // Mark as from history if needed
           });
         }
       });
     }
     
+    // totalDefects now correctly counts only actual defects
     const totalDefects = combinedData.length;
-    // Instead of just checking n.type === 'Resolved'
-    const resolvedDefects = combinedData.filter(n => {
-          // For notifications, check the type
-          if (n.type === 'Resolved') return true;
-          
-          // For history items, check the status field
-          if (n.status === 'resolved') return true;
-          
-          return false;
-        }).length;
+    
+    const resolvedDefects = combinedData.filter(n => 
+      n.type === 'Resolved' || n.status === 'resolved'
+    ).length;
+    
+    // pendingDefects is total - resolved, which is correct if totalDefects is accurate
     const pendingDefects = totalDefects - resolvedDefects;
     
-    // Determine most common defect type
+    // Determine most common defect type from combinedData (which is now filtered)
     const defectTypes = {};
     combinedData.forEach(notification => {
       if (notification.file && notification.file[0]?.detections) {

@@ -21,14 +21,13 @@ const getDisplayName = (className) => {
   return classNameMapping[className.toLowerCase()] || className;
 };
 
-export const ResultCard = memo(({ item, width, notificationId }) => {
+export const ResultCard = memo(({ item, width, notificationId, onResolve }) => {
   const navigation = useNavigation();
   const { user, updateNotificationType, addNotification } = useGlobalContext();
   const [isResolving, setIsResolving] = useState(false);
-  const [isResolved, setIsResolved] = useState(false);
-  const [savedDocumentId, setSavedDocumentId] = useState(null);
+  const [isLocallyResolved, setIsLocallyResolved] = useState(item?.status === 'resolved');
 
-  const hasValidData = item && (item.detections || item.imageUri || (item.file && item.file.length > 0));
+  const hasValidData = item && (item.detections || item.imageUri || (item.file && item.file.length > 0) || item.imageUrl);
   if (!hasValidData) {
     return (
       <View style={[styles.resultCard, { width }]}>
@@ -42,37 +41,14 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
     try {
       if (notificationId) {
         await updateNotificationType(notificationId, "Resolved");
-        setIsResolved(true);
-        return;
+        setIsLocallyResolved(true);
+        if (onResolve) {
+          onResolve();
+        }
+      } else {
+        console.warn("ResultCard: notificationId is missing, cannot resolve.");
+        Alert.alert('Error', 'Cannot resolve defect: Missing ID.');
       }
-
-      if (item.databaseId) {
-        await updateNotificationType(item.databaseId, "Resolved");
-        setIsResolved(true);
-        return;
-      }
-
-      if (!user || !user.$id) {
-        Alert.alert('Error', 'You need to be logged in to resolve defects');
-        return;
-      }
-
-      const savedDocument = await saveDefectResult(user.$id, item);
-      await updateNotificationType(savedDocument.$id, "Resolved");
-      setSavedDocumentId(savedDocument.$id);
-
-      const newNotification = {
-        id: savedDocument.$id,
-        type: 'Resolved',
-        priority: item.detections?.[0]?.priority || 'N/A',
-        datetime: new Date().toISOString(),
-        name: item.fileName || 'Unnamed defect',
-        file: [item],
-      };
-
-      addNotification(newNotification);
-      setIsResolved(true);
-
     } catch (error) {
       Alert.alert('Error', 'Failed to resolve defect: ' + (error.message || 'Unknown error'));
     } finally {
@@ -153,7 +129,7 @@ export const ResultCard = memo(({ item, width, notificationId }) => {
 
       {isThermalSolar && detection?.class && !detection.class.toLowerCase().includes('no defect') && (
         <View style={styles.buttonContainer}>
-          {isResolved ? (
+          {isLocallyResolved ? (
             <View style={styles.resolvedStatus}>
               <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
               <Text style={styles.resolvedStatusText}>Resolved</Text>
