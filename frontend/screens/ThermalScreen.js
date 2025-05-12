@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 import { useGlobalContext } from '../../backend/context/GlobalProvider';
 import ActionButtons from '../components/navigation/ActionButtons';
 import BackgroundWrapper from '../components/common/BackgroundWrapper';
@@ -22,6 +23,7 @@ import { CAMERA_URL, SNAPSHOT_API_URL } from '../config'
 const ThermalScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [snapshotMode, setSnapshotMode] = useState('analyze'); // 'analyze' or 'save'
   const { addNotification, user } = useGlobalContext();
   const [mountKey, setMountKey] = useState(Date.now());
   const webViewRef = useRef(null);
@@ -66,16 +68,51 @@ const ThermalScreen = ({ navigation }) => {
       const fileInfo = await FileSystem.getInfoAsync(fileUri);
       const fileSize = fileInfo.size; // Size in bytes
 
-      const snapshotImage = [{
-        imageUri: fileUri,
-        name: `snapshot_${Date.now()}.jpg`,
-        type: 'image/jpeg',
-        size: fileSize,
-      }];
+      if (snapshotMode === 'analyze') {
+        const snapshotImage = [{
+          imageUri: fileUri,
+          name: `snapshot_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+          size: fileSize,
+        }];
+        processAndAnalyzeImages(snapshotImage, setIsAnalyzing, addNotification, navigation, user);
+      } else { // snapshotMode === 'save'
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          addNotification({
+            title: 'Permission Denied',
+            message: 'Cannot save image without media library permission.',
+            type: 'error',
+          });
+          return;
+        }
 
-      processAndAnalyzeImages(snapshotImage, setIsAnalyzing, addNotification, navigation, user);
+        try {
+          const asset = await MediaLibrary.createAssetAsync(fileUri);
+          // Optionally, create an album or save to a specific album
+          // const album = await MediaLibrary.getAlbumAsync('YourAppName');
+          // if (album === null) {
+          //   await MediaLibrary.createAlbumAsync('YourAppName', asset, false);
+          // } else {
+          //   await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+          // }
+          console.log('Image saved to gallery successfully!', asset.uri); // Keep a log for debugging
+        } catch (saveError) {
+          console.error('Error saving image to gallery:', saveError);
+          addNotification({
+            title: 'Save Error',
+            message: 'Could not save image to gallery.',
+            type: 'error',
+          });
+        }
+      }
     } catch (error) {
       console.error('Error converting base64 to file:', error);
+      addNotification({
+        title: 'Snapshot Error',
+        message: 'Could not process snapshot.',
+        type: 'error',
+      });
     }
   };
 
@@ -125,6 +162,21 @@ const ThermalScreen = ({ navigation }) => {
               <Ionicons name="refresh" size={24} color={colors.text.light} />
             </TouchableOpacity>
           </View>
+          {/* Snapshot Mode Toggle */}
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              style={[styles.toggleButton, snapshotMode === 'analyze' && styles.toggleButtonActive]}
+              onPress={() => setSnapshotMode('analyze')}
+            >
+              <Text style={[styles.toggleButtonText, snapshotMode === 'analyze' && styles.toggleButtonTextActive]}>Analyze Immediately</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleButton, snapshotMode === 'save' && styles.toggleButtonActive]}
+              onPress={() => setSnapshotMode('save')}
+            >
+              <Text style={[styles.toggleButtonText, snapshotMode === 'save' && styles.toggleButtonTextActive]}>Save to Gallery</Text>
+            </TouchableOpacity>
+          </View>
           <SnapshotButton onPress={() => {
             if (webViewRef.current) {
               webViewRef.current.injectJavaScript('captureSnapshot();');
@@ -168,5 +220,30 @@ const styles = StyleSheet.create({
   }, 
   webview: {
     flex: 1,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  toggleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: colors.background.dark,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  toggleButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  toggleButtonText: {
+    color: colors.text.light,
+    fontWeight: 'bold',
+  },
+  toggleButtonTextActive: {
+    color: colors.white,
   },
 });

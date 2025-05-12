@@ -129,95 +129,89 @@ export default function NotificationsSection() {
   };
 
   const handleNotification = (notification) => {
-    // Ensure we have a valid notification with an ID
     if (!notification || !notification.id) {
       console.error("Invalid notification: missing ID", notification);
       return;
     }
-    
-    // Log the notification structure for debugging
+
     console.log("Handling notification click:", {
       id: notification.id,
       type: notification.type,
       message: notification.message,
       fileData: notification.file
     });
-    
-    // Always pass the notification ID (which should be a valid database ID)
+
     if (notification.type !== 'Resolved') {
-      // Handle the file property which can be in different formats
       let fileDataArray = [];
-      
+      let isWarningNoSolarPanel = false; // Flag for this specific case
+
       try {
         if (notification.file) {
-          // Make sure we have an array of file data
-          fileDataArray = Array.isArray(notification.file) ? 
-                         notification.file : 
+          fileDataArray = Array.isArray(notification.file) ?
+                         notification.file :
                          (typeof notification.file === 'object' ? [notification.file] : []);
           
-          // Important: If there's a custom message in the notification, add it to all file objects
           if (notification.message) {
+            // Check if the message indicates "No solar panel detected" or "Not-Solar"
+            isWarningNoSolarPanel = notification.message.toLowerCase().includes('no solar panel detected') || 
+                                    notification.message.toLowerCase().includes('not-solar');
+                                    
             fileDataArray = fileDataArray.map(file => ({
               ...file,
-              message: notification.message,
-              // For "No solar panel" warnings, explicitly set containsSolarPanel to false
-              containsSolarPanel: notification.message && 
-                notification.message.toLowerCase().includes('no solar panel') ? false : true
+              message: notification.message, // Preserve the original message
+              // Explicitly set imageClass or a similar property if it's a "no solar panel" warning
+              imageClass: isWarningNoSolarPanel ? 'Not-Solar' : (file.imageClass || 'Unknown'),
+              containsSolarPanel: !isWarningNoSolarPanel,
+              // Ensure detections is explicitly empty for this warning type
+              detections: isWarningNoSolarPanel ? [] : (file.detections || []) 
             }));
           }
-        } else if (notification.imageUrl) {
-          // Handle historical defects that don't use the file property
+        } else if (notification.imageUrl) { // Historical data
+          isWarningNoSolarPanel = notification.message && 
+                                  (notification.message.toLowerCase().includes('no solar panel detected') ||
+                                   notification.message.toLowerCase().includes('not-solar'));
           fileDataArray = [{
             fileName: notification.name || notification.fileName,
             imageUrl: notification.imageUrl,
-            message: notification.message, // Add the message if it exists
-            containsSolarPanel: !(notification.message && 
-              notification.message.toLowerCase().includes('no solar panel')),
-            detections: [{
+            message: notification.message, // Preserve the original message
+            imageClass: isWarningNoSolarPanel ? 'Not-Solar' : (notification.defectClass || 'Unknown'),
+            containsSolarPanel: !isWarningNoSolarPanel,
+            detections: isWarningNoSolarPanel ? [] : [{
               class: notification.defectClass,
               priority: notification.priority
             }]
           }];
-        } else {
-          // Fallback for cases with minimal data
+        } else { // Fallback
+          isWarningNoSolarPanel = notification.message && 
+                                  (notification.message.toLowerCase().includes('no solar panel detected') ||
+                                   notification.message.toLowerCase().includes('not-solar'));
           fileDataArray = [{
             fileName: notification.name || 'Unknown',
-            message: notification.message, // Add the message if it exists
-            containsSolarPanel: !(notification.message && 
-              notification.message.toLowerCase().includes('no solar panel')),
-            detections: [{ 
+            message: notification.message, // Preserve the original message
+            imageClass: isWarningNoSolarPanel ? 'Not-Solar' : 'Unknown',
+            containsSolarPanel: !isWarningNoSolarPanel,
+            detections: isWarningNoSolarPanel ? [] : [{
               class: 'Unknown',
               priority: notification.priority || 'Medium'
             }]
           }];
         }
         
-        // For each fileData item, attach the notification ID so ResultCard can access it
         const fileDataWithIds = fileDataArray.map(file => ({
           ...file,
-          databaseId: notification.id
+          databaseId: notification.id,
+          // This flag helps ResultsScreen differentiate
+          isNoSolarPanelWarning: isWarningNoSolarPanel 
         }));
         
         navigation.navigate('Results', {
-          notificationId: notification.id,
           analysisResults: fileDataWithIds,
-        });
-      } catch (error) {
-        // Handle any errors during processing
-        console.error("Error processing notification data:", error);
-        
-        // Navigate with minimal data to avoid crashing
-        navigation.navigate('Results', {
+          fromNotification: true,
           notificationId: notification.id,
-          analysisResults: [{
-            fileName: notification.name || 'Unknown defect',
-            databaseId: notification.id,
-            message: notification.message,
-            containsSolarPanel: !(notification.message && 
-              notification.message.toLowerCase().includes('no solar panel')),
-            detections: [{ class: 'Unknown', priority: notification.priority || 'Medium' }]
-          }],
         });
+
+      } catch (error) {
+        console.error("Error preparing data for Results screen:", error);
       }
     } else {
       navigation.navigate('DefectHistory', {
