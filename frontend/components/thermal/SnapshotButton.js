@@ -3,25 +3,35 @@ import { TouchableOpacity, Text, View, StyleSheet, ActivityIndicator } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows } from '../../styles/globalStyles';
 
-const SnapshotButton = ({ onPress }) => {
+const SnapshotButton = ({ onPress, isAnalyzing }) => {
   const [isCapturing, setIsCapturing] = useState(false);
 
   const handlePress = async () => {
-    if (!isCapturing) {
+    if (!isCapturing && !isAnalyzing) {
       setIsCapturing(true);
-      await onPress(); // Wait for the snapshot function to execute
-      setIsCapturing(false);
+      try {
+        await onPress();
+      } finally {
+        setIsCapturing(false);
+      }
     }
   };
+
+  const isDisabled = isCapturing || isAnalyzing;
 
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
-        style={[styles.button, isCapturing && styles.disabledButton]}
+        style={[styles.button, isDisabled && styles.disabledButton]}
         onPress={handlePress}
-        disabled={isCapturing}
+        disabled={isDisabled}
       >
-        {isCapturing ? (
+        {isAnalyzing ? (
+          <>
+            <ActivityIndicator size="small" color="#fff" />
+            <Text style={styles.text}>Analyzing...</Text>
+          </>
+        ) : isCapturing ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
           <>
@@ -53,7 +63,15 @@ const styles = StyleSheet.create({
     ...shadows.light,
   },
   disabledButton: {
-    backgroundColor: colors.primary + '99', // Make it slightly transparent when disabled
+    backgroundColor: colors.text.medium,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    elevation: 0,
   },
   text: {
     color: '#fff',

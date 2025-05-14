@@ -183,7 +183,8 @@ const ThermalScreen = ({ navigation }) => {
             if (webViewRef.current) {
               webViewRef.current.injectJavaScript('captureSnapshot();');
             }
-          }} />
+          }}
+          isAnalyzing={snapshotMode === 'analyze' && isAnalyzing} />
         </View >
         <ActionButtons navigation={navigation} currentScreen="Camera" />
       </SafeAreaView>
