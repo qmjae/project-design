@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { loadConfig, saveConfig, updateConfigValues } from '../../config';
+import { loadConfig, saveConfig, updateConfigValues, BACKEND_API_URL } from '../../config';
 import { globalStyles, colors, shadows, spacing, fontSizes, borderRadius } from '../../styles/globalStyles';
 
 const ServerSettings = () => {
@@ -9,19 +9,94 @@ const ServerSettings = () => {
   const [ipAddress, setIpAddress] = useState('');
   const [backendPort, setBackendPort] = useState('');
   const [cameraPort, setCameraPort] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadSettings();
+  const [connectionStatus, setConnectionStatus] = useState('Idle');
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+
+  const checkConnectionStatus = useCallback(async () => {
+    setIsCheckingStatus(true);
+    setConnectionStatus('Checking...');
+    try {
+      if (!BACKEND_API_URL || !BACKEND_API_URL.startsWith('http')) {
+        setConnectionStatus('Error: Invalid Server URL');
+        setIsCheckingStatus(false);
+        return;
+      }
+      const healthUrl = `${BACKEND_API_URL}/health`;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+      const response = await fetch(healthUrl, { method: 'GET', signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'healthy') {
+          if (data.model_loaded === true) {
+            setConnectionStatus('Connected');
+          } else {
+            setConnectionStatus('Connected (Model Issue)');
+          }
+        } else {
+          setConnectionStatus('Disconnected (Server Unhealthy)');
+        }
+      } else {
+        setConnectionStatus(`Disconnected (HTTP ${response.status})`);
+      }
+    } catch (error) {
+      console.error('Connection check error:', error);
+      if (error.name === 'AbortError') {
+        setConnectionStatus('Error: Connection timed out');
+      } else if (error.message.includes('Network request failed')) {
+        setConnectionStatus('Error: Network request failed');
+      } else {
+        setConnectionStatus('Error: Failed to connect');
+      }
+    } finally {
+      setIsCheckingStatus(false);
+    }
   }, []);
 
-  const loadSettings = async () => {
-    try {
+  useEffect(() => {
+    const initialLoad = async () => {
       setLoading(true);
-      const config = await loadConfig();
-      setIpAddress(config.SERVER_IP || '');
-      setBackendPort(config.BACKEND_PORT?.toString() || '');
-      setCameraPort(config.CAMERA_PORT?.toString() || '');
+      try {
+        const loaded = await loadConfig();
+        setIpAddress(loaded.SERVER_IP || '');
+        setBackendPort(loaded.BACKEND_PORT?.toString() || '');
+        setCameraPort(loaded.CAMERA_PORT?.toString() || '');
+        updateConfigValues({
+          SERVER_IP: loaded.SERVER_IP,
+          BACKEND_PORT: loaded.BACKEND_PORT,
+          CAMERA_PORT: loaded.CAMERA_PORT,
+        });
+        await checkConnectionStatus();
+      } catch (error) {
+        Alert.alert('Error', 'Failed to load settings');
+        console.error(error);
+        setConnectionStatus('Error loading settings');
+      } finally {
+        setLoading(false);
+      }
+    };
+    initialLoad();
+  }, [checkConnectionStatus]);
+
+  const loadSettings = async () => {
+    setLoading(true);
+    try {
+      const loaded = await loadConfig();
+      setIpAddress(loaded.SERVER_IP || '');
+      setBackendPort(loaded.BACKEND_PORT?.toString() || '');
+      setCameraPort(loaded.CAMERA_PORT?.toString() || '');
+      updateConfigValues({
+        SERVER_IP: loaded.SERVER_IP,
+        BACKEND_PORT: loaded.BACKEND_PORT,
+        CAMERA_PORT: loaded.CAMERA_PORT,
+      });
+      await checkConnectionStatus();
     } catch (error) {
       Alert.alert('Error', 'Failed to load settings');
       console.error(error);
@@ -53,17 +128,22 @@ const ServerSettings = () => {
     };
 
     try {
+      setLoading(true);
       await saveConfig(newConfig);
-      updateConfigValues({ ...newConfig }); // updateConfigValues will rebuild URLs from these
+      updateConfigValues({ ...newConfig });
       Alert.alert('Success', 'Settings saved successfully');
+      await checkConnectionStatus();
     } catch (error) {
       Alert.alert('Error', 'Failed to save settings');
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleReset = async () => {
     try {
+      setLoading(true);
       await saveConfig({});
       const defaultConfig = await loadConfig();
       setIpAddress(defaultConfig.SERVER_IP || '');
@@ -71,9 +151,12 @@ const ServerSettings = () => {
       setCameraPort(defaultConfig.CAMERA_PORT?.toString() || '');
       updateConfigValues(defaultConfig);
       Alert.alert('Success', 'Settings reset to defaults');
+      await checkConnectionStatus();
     } catch (error) {
       Alert.alert('Error', 'Failed to reset settings');
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,6 +167,16 @@ const ServerSettings = () => {
     } catch {
       return false;
     }
+  };
+
+  const getStatusStyle = (status) => {
+    const s = status.toLowerCase();
+    if (s.includes('connected')) return styles.connectedStatus;
+    if (s.includes('model issue')) return styles.warningStatus;
+    if (s.includes('disconnected')) return styles.errorStatus;
+    if (s.includes('error')) return styles.errorStatus;
+    if (s.includes('checking')) return styles.checkingStatus;
+    return styles.idleStatus;
   };
 
   return (
@@ -136,10 +229,32 @@ const ServerSettings = () => {
             />
           </View>
 
+          <View style={styles.statusContainer}>
+            <Text style={styles.settingLabel}>Status:</Text>
+            <View style={styles.statusValueContainer}>
+              {isCheckingStatus ? (
+                <ActivityIndicator size="small" color="#007AFF" />
+              ) : (
+                <View style={styles.statusTextContainer}>
+                  {connectionStatus === 'Connected' && (
+                    <Ionicons name="checkmark-circle-outline" size={18} color="green" style={styles.statusIcon} />
+                  )}
+                  <Text style={[styles.statusText, getStatusStyle(connectionStatus)]}>
+                    {connectionStatus}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity onPress={checkConnectionStatus} style={styles.refreshButton} disabled={isCheckingStatus}>
+              <Ionicons name="refresh-outline" size={22} color={isCheckingStatus ? "gray" : "#007AFF"} />
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[globalStyles.buttonPrimary, styles.saveButton]}
               onPress={handleSaveSettings}
+              disabled={loading || isCheckingStatus}
             >
               <Text style={globalStyles.buttonText}>Save Settings</Text>
             </TouchableOpacity>
@@ -147,6 +262,7 @@ const ServerSettings = () => {
             <TouchableOpacity
               style={[globalStyles.buttonSecondary, styles.resetButton]}
               onPress={handleReset}
+              disabled={loading || isCheckingStatus}
             >
               <Text style={globalStyles.buttonTextSecondary}>Reset to Default</Text>
             </TouchableOpacity>
@@ -178,7 +294,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.m,
-    maxHeight: 400,
   },
   settingItem: {
     marginBottom: spacing.m,
@@ -205,6 +320,37 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: spacing.xs,
   },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  statusValueContainer: {
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'flex-start',
+  },
+  statusTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusIcon: {
+    marginRight: 5,
+  },
+  statusText: {
+    fontSize: 15,
+  },
+  refreshButton: {
+    padding: 8,
+  },
+  connectedStatus: { color: 'green' },
+  warningStatus: { color: 'orange' },
+  errorStatus: { color: 'red' },
+  checkingStatus: { color: 'gray' },
+  idleStatus: { color: 'gray' },
 });
 
 export default ServerSettings;
