@@ -12,7 +12,7 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
     const uploadedFilesData = await uploadFilesToAppwrite(images);
     console.log('Uploaded Files Data:', uploadedFilesData);
 
-    const tryFetch = async (url, formData, timeout = 30000) => {
+    const tryFetch = async (url, formData, timeout = 40000) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
