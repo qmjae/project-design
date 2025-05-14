@@ -1,5 +1,6 @@
 import { uploadFilesToAppwrite, saveDefectResult } from '../../../backend/lib/appwrite';
 import { Alert } from 'react-native';
+import * as Notifications from 'expo-notifications'; // Added import
 import { BACKEND_API_URL } from '../../config';
 
 export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotification, navigation, user) => {
@@ -97,6 +98,8 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
     for (const result of analysisResults) {
       let notification;
       let augmentedResult = { ...result }; // Start with the original result
+      let osNotificationTitle = '';
+      let osNotificationBody = '';
 
       if (result.skipAnalysis) {
         const reason = result.imageClass === "Not-Solar"
@@ -111,6 +114,8 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
           message: `Image skipped. ${reason}`,
           file: [{ fileName: result.fileName, imageUri: result.imageUri, detections: [] }]
         };
+        osNotificationTitle = 'Image Skipped';
+        osNotificationBody = `${result.fileName}: ${reason}`;
       } else if (result.detections?.length > 0) {
         try {
           const savedDoc = await saveDefectResult(user.$id, result);
@@ -128,9 +133,13 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
           if (!primaryNotificationId) {
             primaryNotificationId = savedDoc.$id; // Capture the first detected defect's ID
           }
+          osNotificationTitle = 'Defect Detected';
+          osNotificationBody = `Defect found in ${result.fileName}.`;
         } catch (err) {
           console.error('Error saving result:', err);
           notification = null; // Or handle error appropriately
+          osNotificationTitle = 'Processing Error';
+          osNotificationBody = `Error processing ${result.fileName}.`;
         }
       } else {
         notification = {
@@ -147,11 +156,32 @@ export const processAndAnalyzeImages = async (images, setIsAnalyzing, addNotific
           }],
           skipNotification: true
         };
+        osNotificationTitle = 'Analysis Complete';
+        osNotificationBody = `No defects found in ${result.fileName}.`;
       }
 
       augmentedAnalysisResults.push(augmentedResult);
       if (notification) {
         notificationsToCreate.push(notification);
+      }
+
+      // Schedule OS Notification
+      if (osNotificationBody) { // Only schedule if there's something to notify
+        try {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: osNotificationTitle,
+              body: osNotificationBody,
+              data: { 
+                notificationId: notification?.id, // Use the in-app notification ID if available
+                fileName: result.fileName 
+              },
+            },
+            trigger: null, // null trigger sends immediately
+          });
+        } catch (error) {
+          console.error('Error scheduling OS notification:', error);
+        }
       }
     }
 

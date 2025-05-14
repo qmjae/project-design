@@ -25,6 +25,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/adlaw-logov2.png",
+    "notification": {
+      "icon": "./assets/adlaw-notification.png",
+      "color": "#FFFFFF"
+    },
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/adlaw-v2.png",
