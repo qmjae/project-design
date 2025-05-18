@@ -57,13 +57,15 @@ export const ResultCard = memo(({ item, width, notificationId, onResolve }) => {
   };
 
   let detection = null;
-  if (item.detections) {
-    if (Array.isArray(item.detections)) {
-      detection = item.detections[0] || null;
-    } else {
-      detection = item.detections;
-      item.detections = [item.detections];
-    }
+
+  if (item?.primaryDetection) {
+    detection = item.primaryDetection;
+  } else if (Array.isArray(item.detections)) {
+    // fall back: first one whose class matches defectName, or just first
+    detection =
+      item.detections.find(d => d.class === item.defectName) ||
+      item.detections[0] ||
+      null;
   }
 
   const imageClass = item.imageClass || "Unknown";
